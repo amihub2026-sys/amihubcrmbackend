@@ -1,0 +1,1555 @@
+{
+  "plans": {
+    "key": "plans",
+    "title": "Monthly plans",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Plan name",
+        "type": "text"
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer"
+      },
+      {
+        "key": "month",
+        "label": "Month",
+        "type": "month"
+      },
+      {
+        "key": "platforms",
+        "label": "Platforms",
+        "type": "text"
+      },
+      {
+        "key": "posterTarget",
+        "label": "Posters",
+        "type": "number"
+      },
+      {
+        "key": "reelTarget",
+        "label": "Reels",
+        "type": "number"
+      },
+      {
+        "key": "storyTarget",
+        "label": "Stories",
+        "type": "number"
+      },
+      {
+        "key": "videoTarget",
+        "label": "Videos",
+        "type": "number"
+      },
+      {
+        "key": "assignedEmployees",
+        "label": "Team",
+        "type": "employee-list"
+      },
+      {
+        "key": "planDueDate",
+        "label": "Content plan due",
+        "type": "date"
+      },
+      {
+        "key": "assetsDueDate",
+        "label": "Customer assets due",
+        "type": "date"
+      },
+      {
+        "key": "reportDueDate",
+        "label": "Monthly report due",
+        "type": "date"
+      }
+    ],
+    "statuses": [
+      "PLANNED",
+      "ACTIVE",
+      "COMPLETED"
+    ]
+  },
+  "content": {
+    "key": "content",
+    "title": "Content calendar",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Content title",
+        "type": "text"
+      },
+      {
+        "key": "marketingPlanId",
+        "label": "Marketing plan",
+        "type": "plan"
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer"
+      },
+      {
+        "key": "contentType",
+        "label": "Content type",
+        "type": "text"
+      },
+      {
+        "key": "platform",
+        "label": "Platform",
+        "type": "text"
+      },
+      {
+        "key": "scheduledDate",
+        "label": "Scheduled date",
+        "type": "date"
+      },
+      {
+        "key": "assignedTo",
+        "label": "Assigned to",
+        "type": "employee"
+      },
+      {
+        "key": "fileUrl",
+        "label": "Creative URL",
+        "type": "url"
+      },
+      {
+        "key": "clientFeedback",
+        "label": "Client feedback",
+        "type": "textarea"
+      },
+      {
+        "key": "approvalDueDate",
+        "label": "Client approval due",
+        "type": "date"
+      }
+    ],
+    "statuses": [
+      "PLANNED",
+      "ASSIGNED",
+      "CREATED",
+      "INTERNAL_REVIEW",
+      "CLIENT_REVIEW",
+      "REVISION",
+      "APPROVED",
+      "SCHEDULED",
+      "PUBLISHED"
+    ]
+  },
+  "campaigns": {
+    "key": "campaigns",
+    "title": "Ad campaigns",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Campaign name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer",
+        "required": true
+      },
+      {
+        "key": "platform",
+        "label": "Ad platform",
+        "type": "select",
+        "required": true,
+        "options": [
+          "Meta \u2014 Facebook & Instagram",
+          "Google Ads",
+          "LinkedIn",
+          "YouTube",
+          "Other"
+        ]
+      },
+      {
+        "key": "objective",
+        "label": "Campaign objective",
+        "type": "text",
+        "required": false
+      },
+      {
+        "key": "startDate",
+        "label": "Start date",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "endDate",
+        "label": "End date",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "budget",
+        "label": "Approved ad budget \u20b9",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "actualSpend",
+        "label": "Actual ad spend \u20b9",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "leadCount",
+        "label": "Reported leads generated",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "conversions",
+        "label": "Reported paying customers",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "assignedTo",
+        "label": "Campaign owner",
+        "type": "employee",
+        "required": true
+      },
+      {
+        "key": "notes",
+        "label": "Results / attribution notes",
+        "type": "textarea",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "DRAFT",
+      "ACTIVE",
+      "PAUSED",
+      "COMPLETED"
+    ]
+  },
+  "campaignLeads": {
+    "key": "campaignLeads",
+    "title": "Campaign enquiries",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Enquirer name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "campaignId",
+        "label": "Ad campaign",
+        "type": "campaign",
+        "required": true
+      },
+      {
+        "key": "customerId",
+        "label": "Client business",
+        "type": "customer",
+        "required": true
+      },
+      {
+        "key": "phone",
+        "label": "Phone",
+        "type": "tel",
+        "required": false
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "type": "email",
+        "required": false
+      },
+      {
+        "key": "receivedDate",
+        "label": "Enquiry date",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "assignedTo",
+        "label": "Follow-up owner",
+        "type": "employee",
+        "required": false
+      },
+      {
+        "key": "notes",
+        "label": "Enquiry / outcome",
+        "type": "textarea",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "NEW",
+      "CONTACTED",
+      "INTERESTED",
+      "CONVERTED",
+      "LOST"
+    ]
+  },
+  "projects": {
+    "key": "projects",
+    "title": "All projects",
+    "fields": [
+      {
+        "key": "projectName",
+        "label": "Project name",
+        "type": "text"
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer"
+      },
+      {
+        "key": "projectType",
+        "label": "Project type",
+        "type": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "textarea"
+      },
+      {
+        "key": "projectManager",
+        "label": "Project manager",
+        "type": "employee"
+      },
+      {
+        "key": "assignedEmployees",
+        "label": "Team",
+        "type": "employee-list"
+      },
+      {
+        "key": "startDate",
+        "label": "Start date",
+        "type": "date"
+      },
+      {
+        "key": "deadline",
+        "label": "Deadline",
+        "type": "date"
+      },
+      {
+        "key": "priority",
+        "label": "Priority",
+        "type": "text"
+      },
+      {
+        "key": "progress",
+        "label": "Progress (%)",
+        "type": "number"
+      },
+      {
+        "key": "budget",
+        "label": "Budget",
+        "type": "number"
+      }
+    ],
+    "statuses": [
+      "REQUIREMENT",
+      "DESIGN",
+      "DEVELOPMENT",
+      "TESTING",
+      "INTERNAL_REVIEW",
+      "CLIENT_REVIEW",
+      "REVISION",
+      "DEPLOYMENT",
+      "COMPLETED",
+      "DELIVERED"
+    ]
+  },
+  "tasks": {
+    "key": "tasks",
+    "title": "Tasks",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Task title",
+        "type": "text"
+      },
+      {
+        "key": "projectId",
+        "label": "Project",
+        "type": "project"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "textarea"
+      },
+      {
+        "key": "assignedTo",
+        "label": "Assigned to",
+        "type": "employee"
+      },
+      {
+        "key": "dueDate",
+        "label": "Due date",
+        "type": "date"
+      },
+      {
+        "key": "priority",
+        "label": "Priority",
+        "type": "text"
+      },
+      {
+        "key": "progress",
+        "label": "Progress (%)",
+        "type": "number"
+      },
+      {
+        "key": "comments",
+        "label": "Comments",
+        "type": "textarea"
+      },
+      {
+        "key": "attachments",
+        "label": "File link",
+        "type": "url"
+      }
+    ],
+    "statuses": [
+      "TODO",
+      "IN_PROGRESS",
+      "REVIEW",
+      "CHANGES_REQUIRED",
+      "COMPLETED"
+    ]
+  },
+  "files": {
+    "key": "files",
+    "title": "Project files",
+    "fields": [
+      {
+        "key": "title",
+        "label": "File name",
+        "type": "text"
+      },
+      {
+        "key": "projectId",
+        "label": "Project",
+        "type": "project"
+      },
+      {
+        "key": "fileUrl",
+        "label": "File URL",
+        "type": "url"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "REQUIREMENTS",
+      "WORKING",
+      "DELIVERABLE"
+    ]
+  },
+  "leads": {
+    "key": "leads",
+    "title": "Leads",
+    "fields": [
+      {
+        "key": "businessName",
+        "label": "Business name",
+        "type": "text"
+      },
+      {
+        "key": "contactPerson",
+        "label": "Contact person",
+        "type": "text"
+      },
+      {
+        "key": "phone",
+        "label": "Phone",
+        "type": "tel"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "type": "email"
+      },
+      {
+        "key": "location",
+        "label": "Location",
+        "type": "text"
+      },
+      {
+        "key": "interestedServices",
+        "label": "Interested services",
+        "type": "text"
+      },
+      {
+        "key": "source",
+        "label": "Lead source",
+        "type": "text"
+      },
+      {
+        "key": "assignedTo",
+        "label": "Assigned to",
+        "type": "employee"
+      },
+      {
+        "key": "priority",
+        "label": "Priority",
+        "type": "text"
+      },
+      {
+        "key": "nextFollowUpDate",
+        "label": "Next follow-up",
+        "type": "date"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "NEW",
+      "ASSIGNED",
+      "CONTACTED",
+      "FOLLOW_UP",
+      "INTERESTED",
+      "MEETING",
+      "QUOTATION",
+      "NEGOTIATION",
+      "WON",
+      "LOST"
+    ]
+  },
+  "calls": {
+    "key": "calls",
+    "title": "Call activity",
+    "fields": [
+      {
+        "key": "leadId",
+        "label": "Lead",
+        "type": "lead"
+      },
+      {
+        "key": "employeeId",
+        "label": "Employee",
+        "type": "employee"
+      },
+      {
+        "key": "callDate",
+        "label": "Call date",
+        "type": "date"
+      },
+      {
+        "key": "notes",
+        "label": "Call notes",
+        "type": "textarea"
+      },
+      {
+        "key": "nextFollowUpDate",
+        "label": "Next follow-up",
+        "type": "date"
+      }
+    ],
+    "statuses": [
+      "CONNECTED",
+      "NO_ANSWER",
+      "BUSY",
+      "SWITCHED_OFF",
+      "CALL_BACK",
+      "INTERESTED",
+      "NOT_INTERESTED",
+      "WRONG_NUMBER",
+      "MEETING_FIXED"
+    ]
+  },
+  "followups": {
+    "key": "followups",
+    "title": "Follow-ups",
+    "fields": [
+      {
+        "key": "leadId",
+        "label": "Lead",
+        "type": "lead"
+      },
+      {
+        "key": "assignedTo",
+        "label": "Assigned to",
+        "type": "employee"
+      },
+      {
+        "key": "followUpDate",
+        "label": "Date",
+        "type": "date"
+      },
+      {
+        "key": "followUpTime",
+        "label": "Time",
+        "type": "time"
+      },
+      {
+        "key": "type",
+        "label": "Contact method",
+        "type": "text"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "PENDING",
+      "COMPLETED",
+      "CANCELLED"
+    ]
+  },
+  "meetings": {
+    "key": "meetings",
+    "title": "Meetings",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Meeting title",
+        "type": "text"
+      },
+      {
+        "key": "leadId",
+        "label": "Lead",
+        "type": "lead"
+      },
+      {
+        "key": "date",
+        "label": "Date",
+        "type": "date"
+      },
+      {
+        "key": "time",
+        "label": "Time",
+        "type": "time"
+      },
+      {
+        "key": "meetingType",
+        "label": "Meeting type",
+        "type": "text"
+      },
+      {
+        "key": "location",
+        "label": "Location / meeting link",
+        "type": "text"
+      },
+      {
+        "key": "assignedEmployees",
+        "label": "Attendees",
+        "type": "employee-list"
+      },
+      {
+        "key": "outcome",
+        "label": "Outcome",
+        "type": "textarea"
+      },
+      {
+        "key": "nextAction",
+        "label": "Next action",
+        "type": "text"
+      }
+    ],
+    "statuses": [
+      "SCHEDULED",
+      "COMPLETED",
+      "CANCELLED"
+    ]
+  },
+  "quotations": {
+    "key": "quotations",
+    "title": "Quotations",
+    "fields": [
+      {
+        "key": "quotationNumber",
+        "label": "Quotation number",
+        "type": "text"
+      },
+      {
+        "key": "leadId",
+        "label": "Lead",
+        "type": "lead"
+      },
+      {
+        "key": "description",
+        "label": "Scope / line items",
+        "type": "textarea"
+      },
+      {
+        "key": "subtotal",
+        "label": "Subtotal",
+        "type": "number"
+      },
+      {
+        "key": "discount",
+        "label": "Discount",
+        "type": "number"
+      },
+      {
+        "key": "tax",
+        "label": "Tax amount",
+        "type": "number"
+      },
+      {
+        "key": "paymentTerms",
+        "label": "Payment terms",
+        "type": "text"
+      },
+      {
+        "key": "validUntil",
+        "label": "Valid until",
+        "type": "date"
+      }
+    ],
+    "statuses": [
+      "DRAFT",
+      "SENT",
+      "ACCEPTED",
+      "REJECTED",
+      "EXPIRED"
+    ]
+  },
+  "employees": {
+    "key": "employees",
+    "title": "Employees",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Employee name",
+        "type": "text"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "type": "email"
+      },
+      {
+        "key": "phone",
+        "label": "Phone",
+        "type": "tel"
+      },
+      {
+        "key": "department",
+        "label": "Department",
+        "type": "text"
+      },
+      {
+        "key": "designation",
+        "label": "Designation",
+        "type": "text"
+      },
+      {
+        "key": "joiningDate",
+        "label": "Joining date",
+        "type": "date"
+      },
+      {
+        "key": "reportingManager",
+        "label": "Reporting manager",
+        "type": "employee"
+      },
+      {
+        "key": "employmentType",
+        "label": "Employment type",
+        "type": "text"
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "ON_LEAVE",
+      "INACTIVE"
+    ]
+  },
+  "attendance": {
+    "key": "attendance",
+    "title": "Attendance",
+    "fields": [
+      {
+        "key": "employeeId",
+        "label": "Employee",
+        "type": "employee"
+      },
+      {
+        "key": "date",
+        "label": "Date",
+        "type": "date"
+      },
+      {
+        "key": "checkIn",
+        "label": "Check-in",
+        "type": "time"
+      },
+      {
+        "key": "checkOut",
+        "label": "Check-out",
+        "type": "time"
+      }
+    ],
+    "statuses": [
+      "PRESENT",
+      "ABSENT",
+      "HALF_DAY",
+      "REMOTE"
+    ]
+  },
+  "leave": {
+    "key": "leave",
+    "title": "Leave requests",
+    "fields": [
+      {
+        "key": "employeeId",
+        "label": "Employee",
+        "type": "employee"
+      },
+      {
+        "key": "leaveType",
+        "label": "Leave type",
+        "type": "text"
+      },
+      {
+        "key": "startDate",
+        "label": "Start date",
+        "type": "date"
+      },
+      {
+        "key": "endDate",
+        "label": "End date",
+        "type": "date"
+      },
+      {
+        "key": "reason",
+        "label": "Reason",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "REJECTED"
+    ]
+  },
+  "users": {
+    "key": "users",
+    "title": "User access",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Name",
+        "type": "text"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "type": "email"
+      },
+      {
+        "key": "role",
+        "label": "Role",
+        "type": "role"
+      },
+      {
+        "key": "employeeId",
+        "label": "Employee",
+        "type": "employee"
+      },
+      {
+        "key": "initialPassword",
+        "label": "Initial / new password (12+ characters)",
+        "type": "password"
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "INACTIVE"
+    ]
+  },
+  "services": {
+    "key": "services",
+    "title": "Services",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Service name",
+        "type": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "INACTIVE"
+    ]
+  },
+  "departments": {
+    "key": "departments",
+    "title": "Departments",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Department name",
+        "type": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "text"
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "INACTIVE"
+    ]
+  },
+  "billingProfile": {
+    "key": "billingProfile",
+    "title": "Billing profile",
+    "fields": [
+      {
+        "key": "name",
+        "label": "Business / legal name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "address",
+        "label": "Billing address",
+        "type": "textarea",
+        "required": true
+      },
+      {
+        "key": "email",
+        "label": "Billing email",
+        "type": "email",
+        "required": false
+      },
+      {
+        "key": "phone",
+        "label": "Business phone",
+        "type": "tel",
+        "required": false
+      },
+      {
+        "key": "taxId",
+        "label": "Tax registration ID (if applicable)",
+        "type": "text",
+        "required": false
+      },
+      {
+        "key": "bankDetails",
+        "label": "Bank / UPI payment instructions",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "key": "terms",
+        "label": "Default invoice terms",
+        "type": "textarea",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "ACTIVE"
+    ]
+  },
+  "tickets": {
+    "key": "tickets",
+    "title": "Support tickets",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Ticket title",
+        "type": "text"
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer"
+      },
+      {
+        "key": "projectId",
+        "label": "Project",
+        "type": "project"
+      },
+      {
+        "key": "description",
+        "label": "Issue description",
+        "type": "textarea"
+      },
+      {
+        "key": "priority",
+        "label": "Priority",
+        "type": "text"
+      },
+      {
+        "key": "assignedTo",
+        "label": "Assigned to",
+        "type": "employee"
+      },
+      {
+        "key": "resolution",
+        "label": "Resolution",
+        "type": "textarea"
+      },
+      {
+        "key": "dueDate",
+        "label": "Response / resolution due",
+        "type": "date"
+      }
+    ],
+    "statuses": [
+      "OPEN",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "WAITING_CLIENT",
+      "RESOLVED",
+      "CLOSED"
+    ]
+  },
+  "renewals": {
+    "key": "renewals",
+    "title": "Renewals",
+    "fields": [
+      {
+        "key": "serviceName",
+        "label": "Service name",
+        "type": "text"
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer"
+      },
+      {
+        "key": "renewalType",
+        "label": "Renewal type",
+        "type": "text"
+      },
+      {
+        "key": "startDate",
+        "label": "Start date",
+        "type": "date"
+      },
+      {
+        "key": "expiryDate",
+        "label": "Expiry date",
+        "type": "date"
+      },
+      {
+        "key": "amount",
+        "label": "Renewal amount",
+        "type": "number"
+      },
+      {
+        "key": "assignedTo",
+        "label": "Assigned to",
+        "type": "employee"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "DUE_SOON",
+      "CONTACTED",
+      "RENEWED",
+      "EXPIRED"
+    ]
+  },
+  "invoices": {
+    "key": "invoices",
+    "title": "Invoices",
+    "fields": [
+      {
+        "key": "invoiceNumber",
+        "label": "Invoice number",
+        "type": "text"
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer"
+      },
+      {
+        "key": "projectId",
+        "label": "Project",
+        "type": "project"
+      },
+      {
+        "key": "description",
+        "label": "Line items / scope",
+        "type": "textarea"
+      },
+      {
+        "key": "subtotal",
+        "label": "Subtotal",
+        "type": "number"
+      },
+      {
+        "key": "tax",
+        "label": "Tax amount",
+        "type": "number"
+      },
+      {
+        "key": "discount",
+        "label": "Discount",
+        "type": "number"
+      },
+      {
+        "key": "invoiceDate",
+        "label": "Invoice date",
+        "type": "date"
+      },
+      {
+        "key": "dueDate",
+        "label": "Due date",
+        "type": "date"
+      },
+      {
+        "key": "subscriptionId",
+        "label": "Recurring service",
+        "type": "subscription",
+        "required": false
+      },
+      {
+        "key": "billingPeriod",
+        "label": "Service period",
+        "type": "month",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "DRAFT",
+      "SENT",
+      "PARTIALLY_PAID",
+      "PAID",
+      "OVERDUE"
+    ]
+  },
+  "installments": {
+    "key": "installments",
+    "title": "Installments",
+    "fields": [
+      {
+        "key": "installmentName",
+        "label": "Installment name",
+        "type": "text"
+      },
+      {
+        "key": "invoiceId",
+        "label": "Invoice",
+        "type": "invoice"
+      },
+      {
+        "key": "amount",
+        "label": "Amount",
+        "type": "number"
+      },
+      {
+        "key": "dueDate",
+        "label": "Due date",
+        "type": "date"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "PENDING",
+      "PARTIALLY_PAID",
+      "PAID",
+      "OVERDUE"
+    ]
+  },
+  "payments": {
+    "key": "payments",
+    "title": "Payments",
+    "fields": [
+      {
+        "key": "invoiceId",
+        "label": "Invoice",
+        "type": "invoice"
+      },
+      {
+        "key": "installmentId",
+        "label": "Installment (optional)",
+        "type": "installment"
+      },
+      {
+        "key": "amount",
+        "label": "Amount received",
+        "type": "number"
+      },
+      {
+        "key": "paymentDate",
+        "label": "Payment date",
+        "type": "date"
+      },
+      {
+        "key": "paymentMethod",
+        "label": "Payment method",
+        "type": "text"
+      },
+      {
+        "key": "transactionReference",
+        "label": "Transaction reference",
+        "type": "text"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      },
+      {
+        "key": "visitId",
+        "label": "Collection visit",
+        "type": "visit",
+        "required": false
+      },
+      {
+        "key": "promiseId",
+        "label": "Payment promise",
+        "type": "promise",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "RECEIVED"
+    ]
+  },
+  "expenses": {
+    "key": "expenses",
+    "title": "Expenses",
+    "fields": [
+      {
+        "key": "description",
+        "label": "Description",
+        "type": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "type": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Amount",
+        "type": "number"
+      },
+      {
+        "key": "expenseDate",
+        "label": "Expense date",
+        "type": "date"
+      },
+      {
+        "key": "paymentMethod",
+        "label": "Payment method",
+        "type": "text"
+      },
+      {
+        "key": "projectId",
+        "label": "Project (optional)",
+        "type": "project"
+      },
+      {
+        "key": "receiptUrl",
+        "label": "Receipt URL",
+        "type": "url"
+      }
+    ],
+    "statuses": [
+      "PENDING",
+      "APPROVED",
+      "REJECTED"
+    ]
+  },
+  "promises": {
+    "key": "promises",
+    "title": "Payment promises",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Promise description",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer",
+        "required": true
+      },
+      {
+        "key": "invoiceId",
+        "label": "Invoice",
+        "type": "invoice",
+        "required": true
+      },
+      {
+        "key": "amount",
+        "label": "Promised amount \u20b9",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "promisedDate",
+        "label": "Promised payment date",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "assignedTo",
+        "label": "Collection owner",
+        "type": "employee",
+        "required": true
+      },
+      {
+        "key": "visitId",
+        "label": "Related visit",
+        "type": "visit",
+        "required": false
+      },
+      {
+        "key": "notes",
+        "label": "Customer statement / notes",
+        "type": "textarea",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "OPEN",
+      "PARTIALLY_FULFILLED",
+      "FULFILLED",
+      "BROKEN",
+      "CANCELLED"
+    ]
+  },
+  "subscriptions": {
+    "key": "subscriptions",
+    "title": "Recurring services",
+    "fields": [
+      {
+        "key": "serviceName",
+        "label": "Service name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer",
+        "required": true
+      },
+      {
+        "key": "serviceType",
+        "label": "Service type",
+        "type": "select",
+        "required": true,
+        "options": [
+          "Backend maintenance",
+          "Digital marketing",
+          "SEO",
+          "Hosting",
+          "Software support",
+          "Other"
+        ]
+      },
+      {
+        "key": "amount",
+        "label": "Service fee per cycle \u20b9",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "frequency",
+        "label": "Billing frequency",
+        "type": "select",
+        "required": true,
+        "options": [
+          "Monthly",
+          "Quarterly",
+          "Yearly"
+        ]
+      },
+      {
+        "key": "startDate",
+        "label": "Service start",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "nextBillingDate",
+        "label": "Next invoice date",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "paymentDueDays",
+        "label": "Payment due within (days)",
+        "type": "number",
+        "required": false
+      },
+      {
+        "key": "assignedTo",
+        "label": "Account owner",
+        "type": "employee",
+        "required": true
+      },
+      {
+        "key": "notes",
+        "label": "Service commitment",
+        "type": "textarea",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "PAUSED",
+      "CANCELLED"
+    ]
+  },
+  "customers": {
+    "key": "customers",
+    "title": "All customers",
+    "fields": [
+      {
+        "key": "businessName",
+        "label": "Business name",
+        "type": "text"
+      },
+      {
+        "key": "contactPerson",
+        "label": "Contact person",
+        "type": "text"
+      },
+      {
+        "key": "phone",
+        "label": "Phone",
+        "type": "tel"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "type": "email"
+      },
+      {
+        "key": "address",
+        "label": "Address",
+        "type": "textarea"
+      },
+      {
+        "key": "location",
+        "label": "Location",
+        "type": "text"
+      },
+      {
+        "key": "services",
+        "label": "Services",
+        "type": "text"
+      },
+      {
+        "key": "accountManager",
+        "label": "Account manager",
+        "type": "employee"
+      }
+    ],
+    "statuses": [
+      "ACTIVE",
+      "INACTIVE"
+    ]
+  },
+  "visits": {
+    "key": "visits",
+    "title": "Customer visits",
+    "fields": [
+      {
+        "key": "title",
+        "label": "Visit purpose",
+        "type": "select",
+        "required": true,
+        "options": [
+          "Sales discussion",
+          "Requirements collection",
+          "Project review",
+          "Payment collection",
+          "Support",
+          "Renewal discussion",
+          "Other"
+        ]
+      },
+      {
+        "key": "customerId",
+        "label": "Customer",
+        "type": "customer",
+        "required": true
+      },
+      {
+        "key": "visitDate",
+        "label": "Visit date",
+        "type": "date",
+        "required": true
+      },
+      {
+        "key": "visitTime",
+        "label": "Time",
+        "type": "time",
+        "required": false
+      },
+      {
+        "key": "assignedTo",
+        "label": "Visited by",
+        "type": "employee",
+        "required": true
+      },
+      {
+        "key": "location",
+        "label": "Visit location",
+        "type": "text",
+        "required": false
+      },
+      {
+        "key": "outcome",
+        "label": "Discussion and outcome",
+        "type": "textarea",
+        "required": true
+      },
+      {
+        "key": "nextAction",
+        "label": "Next action",
+        "type": "text",
+        "required": false
+      },
+      {
+        "key": "nextFollowUpDate",
+        "label": "Next follow-up",
+        "type": "date",
+        "required": false
+      },
+      {
+        "key": "notes",
+        "label": "Internal notes",
+        "type": "textarea",
+        "required": false
+      }
+    ],
+    "statuses": [
+      "PLANNED",
+      "COMPLETED",
+      "CANCELLED"
+    ]
+  }
+}
