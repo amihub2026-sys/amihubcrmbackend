@@ -72,6 +72,9 @@ export function validate(r, body, existing = null) {
       continue;
     }
     if (f.type === "number") {
+      if (typeof v === "string" && v.trim() !== "") {
+  v = Number(v);
+}
       assert(
         typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 1e10,
         422,
@@ -94,21 +97,44 @@ export function validate(r, body, existing = null) {
         assert(Number.isInteger(v), 422, `${f.key} must be an integer`);
       if (f.key === "paymentDueDays")
         assert(v <= 365, 422, "Payment due days must be within 365");
-    } else if (f.type === "employee-list") {
-      if (typeof v === "string")
-        v = v
-          .split(",")
-          .map((x) => x.trim())
-          .filter(Boolean);
-      assert(
-        Array.isArray(v) &&
-          v.length <= 100 &&
-          v.every((x) => typeof x === "string" && x.length <= 100),
-        422,
-        "Invalid employee list",
-      );
-      v = [...new Set(v)];
-    } else {
+ } else if (f.type === "employee-list") {
+
+  if (typeof v === "string")
+    v = v
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+  assert(
+    Array.isArray(v) &&
+      v.length <= 100 &&
+      v.every((x) => typeof x === "string" && x.length <= 100),
+    422,
+    "Invalid employee list",
+  );
+
+  v = [...new Set(v)];
+
+} else if (f.type === "number-list") {
+
+  if (typeof v === "string") {
+    v = v
+      .split(",")
+      .map((x) => Number(x.trim()));
+  }
+
+  assert(
+    Array.isArray(v) &&
+      v.length > 0 &&
+      v.length <= 7 &&
+      v.every((x) => Number.isInteger(x) && x >= 0 && x <= 6),
+    422,
+    `Invalid ${f.key}`,
+  );
+
+  v = [...new Set(v)];
+
+} else {
       assert(
         typeof v === "string" &&
           v.length <=

@@ -159,7 +159,7 @@
         "type": "select",
         "required": true,
         "options": [
-          "Meta \u2014 Facebook & Instagram",
+          "Meta — Facebook & Instagram",
           "Google Ads",
           "LinkedIn",
           "YouTube",
@@ -186,13 +186,13 @@
       },
       {
         "key": "budget",
-        "label": "Approved ad budget \u20b9",
+        "label": "Approved ad budget ₹",
         "type": "number",
         "required": true
       },
       {
         "key": "actualSpend",
-        "label": "Actual ad spend \u20b9",
+        "label": "Actual ad spend ₹",
         "type": "number",
         "required": true
       },
@@ -755,11 +755,26 @@
         "label": "Reporting manager",
         "type": "employee"
       },
-      {
-        "key": "employmentType",
-        "label": "Employment type",
-        "type": "text"
-      }
+    {
+  "key": "employmentType",
+  "label": "Employment type",
+  "type": "text"
+},
+{
+  "key": "monthlySalary",
+  "label": "Monthly salary",
+  "type": "number"
+},
+{
+  "key": "salaryWorkingDays",
+  "label": "Salary working days",
+  "type": "number"
+},
+{
+  "key": "allowedCasualLeavePerMonth",
+  "label": "Allowed casual leave per month",
+  "type": "number"
+}
     ],
     "statuses": [
       "ACTIVE",
@@ -792,13 +807,53 @@
         "type": "time"
       }
     ],
-    "statuses": [
-      "PRESENT",
-      "ABSENT",
-      "HALF_DAY",
-      "REMOTE"
-    ]
+   "statuses": [
+  "PRESENT",
+  "ABSENT",
+  "HALF_DAY",
+  "REMOTE",
+  "LEAVE"
+]
   },
+  "attendanceSettings": {
+  "key": "attendanceSettings",
+  "title": "Attendance Settings",
+  "fields": [
+    {
+      "key": "officeStartTime",
+      "label": "Office start time",
+      "type": "time",
+      "required": true
+    },
+    {
+      "key": "officeEndTime",
+      "label": "Office end time",
+      "type": "time",
+      "required": true
+    },
+    {
+      "key": "absenceBufferMinutes",
+      "label": "Absence buffer minutes",
+      "type": "number",
+      "required": true
+    },
+    {
+      "key": "workingDays",
+      "label": "Working days",
+      "type": "number-list",
+      "required": true
+    },
+    {
+      "key": "timezone",
+      "label": "Timezone",
+      "type": "text",
+      "required": true
+    }
+  ],
+  "statuses": [
+    "ACTIVE"
+  ]
+},
   "leave": {
     "key": "leave",
     "title": "Leave requests",
@@ -808,11 +863,17 @@
         "label": "Employee",
         "type": "employee"
       },
-      {
-        "key": "leaveType",
-        "label": "Leave type",
-        "type": "text"
-      },
+    {
+  "key": "leaveType",
+  "label": "Leave type",
+  "type": "select",
+  "required": true,
+  "options": [
+    "CASUAL",
+    "SICK",
+    "UNPAID"
+  ]
+},
       {
         "key": "startDate",
         "label": "Start date",
@@ -823,17 +884,37 @@
         "label": "End date",
         "type": "date"
       },
-      {
-        "key": "reason",
-        "label": "Reason",
-        "type": "textarea"
-      }
+    {
+  "key": "reason",
+  "label": "Reason",
+  "type": "textarea"
+},
+{
+  "key": "totalDays",
+  "label": "Total leave days",
+  "type": "number"
+},
+{
+  "key": "paidDays",
+  "label": "Paid leave days",
+  "type": "number"
+},
+{
+  "key": "unpaidDays",
+  "label": "Unpaid leave days",
+  "type": "number"
+},
+{
+  "key": "payrollProcessed",
+  "label": "Payroll processed",
+  "type": "text"
+}
     ],
-    "statuses": [
-      "PENDING",
-      "APPROVED",
-      "REJECTED"
-    ]
+"statuses": [
+  "PENDING",
+  "APPROVED",
+  "REJECTED"
+]
   },
   "users": {
     "key": "users",
@@ -1277,6 +1358,127 @@
       "REJECTED"
     ]
   },
+  "payroll": {
+    "key": "payroll",
+    "title": "Employee Payroll",
+    "fields": [
+      {
+        "key": "employeeId",
+        "label": "Employee",
+        "type": "employee",
+        "required": true
+      },
+      {
+        "key": "month",
+        "label": "Salary month",
+        "type": "month",
+        "required": true
+      },
+      {
+        "key": "year",
+        "label": "Year",
+        "type": "number",
+        "required": true
+      },
+      {
+        "key": "grossSalary",
+        "label": "Gross salary",
+        "type": "number"
+        
+      },
+      {
+        "key": "workingDays",
+        "label": "Working days",
+        "type": "number"
+      },
+      {
+        "key": "presentDays",
+        "label": "Present days",
+        "type": "number"
+      },
+      {
+        "key": "casualLeaveDays",
+        "label": "Casual leave days",
+        "type": "number"
+      },
+      {
+        "key": "allowedCasualLeaveDays",
+        "label": "Allowed casual leave",
+        "type": "number"
+      },
+      {
+        "key": "extraLeaveDays",
+        "label": "Extra leave days",
+        "type": "number"
+      },
+      {
+        "key": "unpaidLeaveDays",
+        "label": "Unpaid leave days",
+        "type": "number"
+      },
+      {
+        "key": "halfDays",
+        "label": "Half days",
+        "type": "number"
+      },
+      {
+        "key": "perDaySalary",
+        "label": "Per day salary",
+        "type": "number"
+      },
+      {
+        "key": "leaveDeduction",
+        "label": "Leave deduction",
+        "type": "number"
+      },
+      {
+        "key": "otherDeduction",
+        "label": "Other deduction",
+        "type": "number"
+      },
+      {
+        "key": "bonus",
+        "label": "Bonus",
+        "type": "number"
+      },
+      {
+        "key": "allowance",
+        "label": "Allowance",
+        "type": "number"
+      },
+      {
+        "key": "netSalary",
+        "label": "Net salary",
+        "type": "number"
+      },
+      {
+        "key": "paymentDate",
+        "label": "Payment date",
+        "type": "date"
+      },
+      {
+        "key": "paymentMethod",
+        "label": "Payment method",
+        "type": "text"
+      },
+      {
+        "key": "transactionReference",
+        "label": "Transaction reference",
+        "type": "text"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "textarea"
+      }
+    ],
+    "statuses": [
+      "DRAFT",
+      "CALCULATED",
+      "APPROVED",
+      "PAID"
+    ]
+  },
   "promises": {
     "key": "promises",
     "title": "Payment promises",
@@ -1301,7 +1503,7 @@
       },
       {
         "key": "amount",
-        "label": "Promised amount \u20b9",
+        "label": "Promised amount ₹",
         "type": "number",
         "required": true
       },
@@ -1370,7 +1572,7 @@
       },
       {
         "key": "amount",
-        "label": "Service fee per cycle \u20b9",
+        "label": "Service fee per cycle ₹",
         "type": "number",
         "required": true
       },

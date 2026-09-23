@@ -75,7 +75,7 @@ export async function login(body, ip, previousToken, config) {
       ],
       { session },
     );
-    if (user.role === "developer") {
+    if (user.employeeId) {
       assert(
         user.employeeId,
         422,
@@ -124,8 +124,52 @@ export async function login(body, ip, previousToken, config) {
 
   return { user: publicUser(user), raw, csrf };
 }
-export async function logout(sessionId) {
-  await Session.deleteOne({ _id: sessionId });
+export async function logout(sessionId, user, config) {
+  await transaction(async (session) => {
+    if (user?.employeeId) {
+      const clock = businessClock(config.timezone);
+
+      const attendance = await models.attendance
+        .findOne({
+          employeeId: user.employeeId,
+          date: clock.date,
+        })
+        .session(session)
+        .lean();
+
+      if (attendance && !attendance.checkOutAt) {
+        await models.attendance.updateOne(
+          { _id: attendance._id },
+          {
+            $set: {
+              checkOut: clock.time,
+              checkOutAt: new Date(),
+            },
+            $inc: { revision: 1 },
+          },
+          { session },
+        );
+
+        await audit(
+          user,
+          "attendance",
+          attendance,
+          "Automatic check-out",
+          session,
+        );
+      }
+    }
+
+    await Session.deleteOne({ _id: sessionId }).session(session);
+
+    await audit(
+      user,
+      "auth",
+      { _id: user._id },
+      "Signed out",
+      session,
+    );
+  });
 }
 export async function changePassword(currentUser, body) {
   assert(

@@ -28,7 +28,7 @@ export function createController(config) {
       res.json({ user: auth.publicUser(req.user) });
     },
     async logout(req, res) {
-      await auth.logout(req.session._id);
+      await auth.logout(req.session._id, req.user, config);
       res.clearCookie(cookieName, { ...cookie, maxAge: undefined });
       res.clearCookie("XSRF-TOKEN", {
         ...cookie,

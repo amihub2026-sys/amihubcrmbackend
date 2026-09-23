@@ -39,10 +39,12 @@ import { createRouter as invoicesResourceRouter } from "./modules/invoices/invoi
 import { createRouter as installmentsResourceRouter } from "./modules/installments/installments.routes.js";
 import { createRouter as paymentsResourceRouter } from "./modules/payments/payments.routes.js";
 import { createRouter as expensesResourceRouter } from "./modules/expenses/expenses.routes.js";
+import { createRouter as payrollResourceRouter } from "./modules/payroll/payroll.routes.js";
 import { createRouter as promisesResourceRouter } from "./modules/promises/promises.routes.js";
 import { createRouter as subscriptionsResourceRouter } from "./modules/subscriptions/subscriptions.routes.js";
 import { createRouter as customersResourceRouter } from "./modules/customers/customers.routes.js";
 import { createRouter as visitsResourceRouter } from "./modules/visits/visits.routes.js";
+import { createRouter as attendanceSettingsResourceRouter } from "./modules/attendanceSettings/attendanceSettings.routes.js";
 export function createApp(config) {
   const app = express();
   app.disable("x-powered-by");
@@ -105,10 +107,15 @@ export function createApp(config) {
   app.use("/api/installments", installmentsResourceRouter(config));
   app.use("/api/payments", paymentsResourceRouter(config));
   app.use("/api/expenses", expensesResourceRouter(config));
+  app.use("/api/payroll", payrollResourceRouter(config));
   app.use("/api/promises", promisesResourceRouter(config));
   app.use("/api/subscriptions", subscriptionsResourceRouter(config));
   app.use("/api/customers", customersResourceRouter(config));
   app.use("/api/visits", visitsResourceRouter(config));
+  app.use(
+  "/api/attendanceSettings",
+  attendanceSettingsResourceRouter(config),
+);
   app.use((req, res) =>
     res.status(404).json({ message: "Endpoint not found" }),
   );

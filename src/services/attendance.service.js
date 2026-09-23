@@ -2,11 +2,11 @@ import { models, transaction, plain } from "../config/database.js";
 import { assert, businessClock } from "../utils/index.js";
 import { audit } from "./context.service.js";
 export async function checkOut(user, config) {
-  assert(
-    user.role === "developer" && user.employeeId,
-    403,
-    "Developer employee account required",
-  );
+assert(
+  user.employeeId,
+  403,
+  "Employee account required",
+);
   const clock = businessClock(config.timezone);
   const row = await transaction(async (session) => {
     const row = await models.attendance

@@ -33,6 +33,11 @@ function matches(record, query) {
         : record[k] === v,
   );
 }
+
+function roundMoney(value) {
+  return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+}
+
 async function visible(u, r, record, session) {
   return matches(record, await scope(u, r, session));
 }
@@ -150,7 +155,39 @@ export async function save(u, r, body, id, config, idempotencyKey) {
       409,
       "Receipts are immutable; use a reviewed accounting correction process",
     );
-    let record = validate(r, body, existing);
+let record = validate(r, body, existing);
+
+if (r === "leave" && record.startDate && record.endDate) {
+  const start = new Date(record.startDate + "T00:00:00Z");
+  const end = new Date(record.endDate + "T00:00:00Z");
+
+  const totalDays =
+    Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+  assert(totalDays > 0, 422, "Invalid leave dates");
+
+  record.totalDays = totalDays;
+}
+
+if (
+  r === "leave" &&
+  !["owner", "admin", "hr"].includes(u.role)
+) {
+  assert(
+    u.employeeId,
+    403,
+    "Employee account is not linked"
+  );
+
+  assert(
+    !existing,
+    403,
+    "Employees cannot update leave requests"
+  );
+
+  record.employeeId = u.employeeId;
+  record.status = "PENDING";
+}
     if (
       ["developer", "designer", "video_editor", "telecaller"].includes(u.role)
     ) {
@@ -238,6 +275,158 @@ export async function save(u, r, body, id, config, idempotencyKey) {
         "Issued invoice cannot return to Draft",
       );
     const linked = await links(u, r, record, session);
+    if (r === "payroll" && (!existing || existing.status === "CALCULATED")) {
+  const employee = linked.employeeId;
+
+  assert(employee, 422, "Employee is required");
+  const grossSalary = Number(employee.monthlySalary || 0);
+const workingDays = Number(employee.salaryWorkingDays || 26);
+const allowedCasualLeaveDays = Number(employee.allowedCasualLeavePerMonth ?? 1);
+assert(grossSalary > 0, 422, "Employee monthly salary is not configured");
+assert(workingDays > 0, 422, "Employee salary working days is invalid");
+const monthValue = String(record.month || "");
+assert(
+  /^\d{4}-\d{2}$/.test(monthValue),
+  422,
+  "Salary month must be in YYYY-MM format",
+);
+const [selectedYear, selectedMonth] = monthValue.split("-").map(Number);
+assert(
+  selectedYear === Number(record.year),
+  422,
+  "Salary month and year do not match",
+);
+const monthStart = `${monthValue}-01`;
+const lastDay = new Date(
+  Date.UTC(selectedYear, selectedMonth, 0),
+).toISOString().slice(0, 10);
+const attendanceRows = await models.attendance
+  .find({
+    employeeId: record.employeeId,
+    date: {
+      $gte: monthStart,
+      $lte: lastDay,
+    },
+  })
+  .session(session)
+  .lean();
+  const presentDays = attendanceRows.filter(
+  (x) => x.status === "PRESENT" || x.status === "REMOTE",
+).length;
+const halfDays = attendanceRows.filter(
+  (x) => x.status === "HALF_DAY",
+).length;
+const absentDays = attendanceRows.filter(
+  (x) => x.status === "ABSENT",
+).length;
+const approvedLeaves = await models.leave
+  .find({
+    employeeId: record.employeeId,
+    status: "APPROVED",
+    startDate: { $lte: lastDay },
+endDate: { $gte: monthStart },
+  })
+  .session(session)
+  .lean();
+  let casualLeaveDays = 0;
+  const casualLeaves = approvedLeaves.filter(
+  (leave) => String(leave.leaveType || "").toUpperCase().includes("CASUAL"),
+);
+casualLeaveDays = casualLeaves.reduce(
+  (total, leave) => total + Number(leave.totalDays || 0),
+  0,
+);
+const unpaidLeaves = approvedLeaves.filter(
+  (leave) => String(leave.leaveType || "").toUpperCase().includes("UNPAID"),
+);
+
+const unpaidLeaveDays = unpaidLeaves.reduce(
+  (total, leave) => total + Number(leave.totalDays || 0),
+  0,
+);
+const extraLeaveDays = Math.max(
+  0,
+  casualLeaveDays - allowedCasualLeaveDays,
+);
+const perDaySalary = roundMoney(grossSalary / workingDays);
+
+const totalDeductionDays =
+  absentDays + unpaidLeaveDays + extraLeaveDays;
+
+const leaveDeduction = roundMoney(
+  totalDeductionDays * perDaySalary
+);
+const otherDeduction = Number(record.otherDeduction || 0);
+const bonus = Number(record.bonus || 0);
+const allowance = Number(record.allowance || 0);
+const netSalary = roundMoney(
+  grossSalary - leaveDeduction - otherDeduction + bonus + allowance
+);
+  record.grossSalary = grossSalary;
+  record.workingDays = workingDays;
+record.presentDays = presentDays;
+record.absentDays = absentDays;
+record.halfDays = halfDays;
+record.casualLeaveDays = casualLeaveDays;
+  record.allowedCasualLeaveDays = allowedCasualLeaveDays;
+  record.extraLeaveDays = extraLeaveDays;
+  record.unpaidLeaveDays = unpaidLeaveDays;
+  record.perDaySalary = roundMoney(perDaySalary);
+  record.leaveDeduction = roundMoney(leaveDeduction);
+  record.otherDeduction = otherDeduction;
+  record.bonus = bonus;
+  record.allowance = allowance;
+  record.netSalary = netSalary;
+  if (!existing) record.status = "CALCULATED";
+}
+if (r === "payroll" && existing) {
+  const allowedTransitions = {
+    CALCULATED: ["APPROVED"],
+    APPROVED: ["PAID"],
+    PAID: [],
+  };
+
+  assert(
+    existing.status === record.status ||
+      allowedTransitions[existing.status]?.includes(record.status),
+    409,
+    "Invalid payroll status change",
+  );
+}
+if (r === "payroll" && existing && existing.status !== "CALCULATED") {
+  const lockedFields = [
+    "employeeId",
+    "month",
+    "year",
+    "grossSalary",
+    "workingDays",
+   "presentDays",
+"absentDays",
+"casualLeaveDays",
+    "allowedCasualLeaveDays",
+    "extraLeaveDays",
+    "unpaidLeaveDays",
+    "halfDays",
+    "perDaySalary",
+    "leaveDeduction",
+    "otherDeduction",
+    "bonus",
+    "allowance",
+    "netSalary",
+  ];
+
+  for (const key of lockedFields) {
+    assert(
+      JSON.stringify(record[key]) === JSON.stringify(existing[key]),
+      409,
+      "Approved payroll financial details cannot be changed",
+    );
+  }
+}
+if (r === "payroll" && record.status === "PAID") {
+  assert(record.paymentDate, 422, "Payment date is required");
+  assert(record.paymentMethod, 422, "Payment method is required");
+}
     if (r === "users" && linked.employeeId)
       assert(
         linked.employeeId.status !== "INACTIVE",
@@ -399,6 +588,96 @@ export async function save(u, r, body, id, config, idempotencyKey) {
         today,
       );
     await audit(u, r, record, existing ? "Updated" : "Created", session);
+    if (
+  r === "leave" &&
+  existing &&
+  existing.status !== "APPROVED" &&
+  record.status === "APPROVED"
+) {
+  const start = new Date(record.startDate + "T00:00:00Z");
+  const end = new Date(record.endDate + "T00:00:00Z");
+
+  for (
+    let date = new Date(start);
+    date <= end;
+    date.setUTCDate(date.getUTCDate() + 1)
+  ) {
+    const leaveDate = date.toISOString().slice(0, 10);
+
+const attendance = await models.attendance
+  .findOne({
+    employeeId: record.employeeId,
+    date: leaveDate,
+  })
+  .session(session)
+  .lean();
+
+if (!attendance) {
+  await models.attendance.create(
+    [
+      {
+        employeeId: record.employeeId,
+        date: leaveDate,
+        status: "LEAVE",
+        source: "APPROVED_LEAVE",
+        createdBy: u._id,
+      },
+    ],
+    { session },
+  );
+} else if (
+  attendance.status === "ABSENT" &&
+  attendance.source === "AUTO_ABSENT"
+) {
+  await models.attendance.updateOne(
+    { _id: attendance._id },
+    {
+      $set: {
+        status: "LEAVE",
+        source: "APPROVED_LEAVE",
+      },
+      $inc: { revision: 1 },
+    },
+    { session },
+  );
+}
+  }
+}
+    if (
+  r === "payroll" &&
+  existing?.status === "APPROVED" &&
+  record.status === "PAID"
+) {
+  const employeeUser = await models.users
+    .findOne({
+      employeeId: record.employeeId,
+      status: "ACTIVE",
+    })
+    .session(session)
+    .lean();
+
+  if (employeeUser) {
+  await Event.create(
+    [
+      {
+        recipientId: employeeUser._id,
+        type: "salary_paid",
+        recordId: record._id,
+        message: `Salary paid: INR ${record.netSalary}`,
+      },
+    ],
+    { session },
+  );
+
+ await models.payroll.updateOne(
+  { _id: record._id },
+  { $set: { notificationSent: true } },
+  { session },
+);
+
+record.notificationSent = true;
+}
+}
     if (r === "payments") {
       const recipients = await models.users
         .find({
@@ -446,6 +725,7 @@ export async function remove(u, r, id, revision) {
       "users",
       "employees",
       "attendance",
+      "payroll",
       "invoices",
       "payments",
       "installments",

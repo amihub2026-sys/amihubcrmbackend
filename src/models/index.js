@@ -22,11 +22,13 @@ import { renewalsModel } from "./renewals.model.js";
 import { invoicesModel } from "./invoices.model.js";
 import { installmentsModel } from "./installments.model.js";
 import { paymentsModel } from "./payments.model.js";
+import { payrollModel } from "./payroll.model.js";
 import { expensesModel } from "./expenses.model.js";
 import { promisesModel } from "./promises.model.js";
 import { subscriptionsModel } from "./subscriptions.model.js";
 import { customersModel } from "./customers.model.js";
 import { visitsModel } from "./visits.model.js";
+import { attendanceSettingsModel } from "./attendanceSettings.model.js";
 export const models = {
   plans: plansModel,
   content: contentModel,
@@ -53,8 +55,10 @@ export const models = {
   installments: installmentsModel,
   payments: paymentsModel,
   expenses: expensesModel,
+  payroll: payrollModel,
   promises: promisesModel,
   subscriptions: subscriptionsModel,
   customers: customersModel,
   visits: visitsModel,
+  attendanceSettings: attendanceSettingsModel
 };
