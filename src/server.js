@@ -10,11 +10,35 @@ import cron from "node-cron";
 
 import { markAbsentEmployees } from "./services/attendance-auto.service.js";
 
+import { runOneSync } from "./modules/meta/meta.sync.js";
+
 try {
 
   const config = configuration();
 
   await connect(config.mongoUri);
+
+  const runMetaWorker = async () => {
+  try {
+    while (await runOneSync(config)) {
+      // Process all queued Meta accounts
+    }
+  } catch (error) {
+    logger.error(
+      {
+        errorType: error.name,
+        message: error.message,
+      },
+      "Meta sync worker failed",
+    );
+  }
+};
+
+runMetaWorker();
+
+cron.schedule("*/1 * * * *", async () => {
+  await runMetaWorker();
+});
 
   cron.schedule(
     "* * * * *",

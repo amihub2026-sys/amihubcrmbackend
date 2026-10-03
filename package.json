@@ -16,7 +16,9 @@
     "worker": "node --env-file-if-exists=.env src/jobs/worker.js",
     "test:unit": "node --test test/unit.test.js",
     "test:http": "node --test test/http.test.js",
-    "connect:frontend": "node scripts/connect-frontend.js"
+    "connect:frontend": "node scripts/connect-frontend.js",
+    "meta:worker": "node --env-file-if-exists=.env src/jobs/meta-worker.js",
+    "test:meta": "node --test --test-concurrency=1 test/meta*.test.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

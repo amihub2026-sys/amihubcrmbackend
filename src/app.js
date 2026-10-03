@@ -1,3 +1,4 @@
+import { createRouter as metaRouter } from "./modules/meta/meta.routes.js";
 import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -45,18 +46,25 @@ import { createRouter as subscriptionsResourceRouter } from "./modules/subscript
 import { createRouter as customersResourceRouter } from "./modules/customers/customers.routes.js";
 import { createRouter as visitsResourceRouter } from "./modules/visits/visits.routes.js";
 import { createRouter as attendanceSettingsResourceRouter } from "./modules/attendanceSettings/attendanceSettings.routes.js";
+
 export function createApp(config) {
   const app = express();
+
   app.disable("x-powered-by");
   app.set("trust proxy", config.trustProxy);
+
   app.use(helmet());
   app.use(express.json({ limit: "256kb" }));
   app.use(cookieParser());
+
   app.use((req, res, next) => {
     req.requestId = randomUUID();
+
     res.setHeader("X-Request-ID", req.requestId);
     res.setHeader("Cache-Control", "no-store");
+
     const started = Date.now();
+
     res.on("finish", () =>
       logger.info(
         {
@@ -68,20 +76,31 @@ export function createApp(config) {
         "request",
       ),
     );
+
     next();
   });
+
   app.use(healthRouter(config));
+
   app.use("/api", rateLimit);
+
   // Login must be registered before authentication; all other auth routes are protected.
   const auth = authRouter(config);
+
   app.post("/api/auth/login", auth);
+
   app.use("/api", createAuthMiddleware(config));
+
   app.use(auth);
+
+  app.use("/api/meta", metaRouter(config));
+
   app.use(attendanceRouter(config));
   app.use(workspaceRouter(config));
   app.use(notificationsRouter(config));
   app.use(billingRouter(config));
   app.use(leadsRouter(config));
+
   app.use("/api/plans", plansResourceRouter(config));
   app.use("/api/content", contentResourceRouter(config));
   app.use("/api/campaigns", campaignsResourceRouter(config));
@@ -112,13 +131,17 @@ export function createApp(config) {
   app.use("/api/subscriptions", subscriptionsResourceRouter(config));
   app.use("/api/customers", customersResourceRouter(config));
   app.use("/api/visits", visitsResourceRouter(config));
+
   app.use(
-  "/api/attendanceSettings",
-  attendanceSettingsResourceRouter(config),
-);
+    "/api/attendanceSettings",
+    attendanceSettingsResourceRouter(config),
+  );
+
   app.use((req, res) =>
     res.status(404).json({ message: "Endpoint not found" }),
   );
+
   app.use(errorHandler);
+
   return app;
 }
