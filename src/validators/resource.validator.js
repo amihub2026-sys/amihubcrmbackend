@@ -33,7 +33,12 @@ const required = {
   installments: ["invoiceId", "amount", "dueDate"],
   payments: ["invoiceId", "amount", "paymentDate", "paymentMethod"],
   expenses: ["description", "amount", "expenseDate"],
-  plans: ["title", "customerId", "month"],
+  plans: [
+  "customerId",
+  "digitalMarketingPlanId",
+  "month",
+  "planStartDate"
+],
   content: ["title", "marketingPlanId", "customerId"],
   tickets: ["title", "customerId", "assignedTo"],
   renewals: ["serviceName", "customerId", "expiryDate", "assignedTo"],

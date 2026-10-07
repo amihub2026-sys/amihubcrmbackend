@@ -1,4 +1,5 @@
 import { plansModel } from "./plans.model.js";
+import { digitalMarketingPlanModel } from "./digitalMarketingPlan.model.js";
 import { contentModel } from "./content.model.js";
 import { campaignsModel } from "./campaigns.model.js";
 import { campaignLeadsModel } from "./campaignLeads.model.js";
@@ -31,6 +32,7 @@ import { visitsModel } from "./visits.model.js";
 import { attendanceSettingsModel } from "./attendanceSettings.model.js";
 export const models = {
   plans: plansModel,
+digitalMarketingPlans: digitalMarketingPlanModel,
   content: contentModel,
   campaigns: campaignsModel,
   campaignLeads: campaignLeadsModel,

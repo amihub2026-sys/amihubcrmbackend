@@ -67,7 +67,7 @@ test("password hashes are salted and verified", async () => {
 
 test("every resource has explicit schema fields matching the frontend contract", async () => {
   const { models, resources } = await import("../src/config/database.js");
-  assert.equal(Object.keys(models).length, 29);
+  assert.equal(Object.keys(models).length, 32);
   for (const [name, resource] of Object.entries(resources)) {
     for (const field of resource.fields) {
       if (field.key === "initialPassword")

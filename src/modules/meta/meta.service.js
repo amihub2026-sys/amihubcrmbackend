@@ -736,3 +736,1338 @@ export async function detail(
       account.timezone,
   };
 }
+// =====================================================
+// CREATE META CAMPAIGN
+// Creates campaign as PAUSED.
+// Does NOT start spending automatically.
+// =====================================================
+
+export async function createCampaign(
+  user,
+  accountId,
+  body,
+  config
+) {
+  // Only privileged CRM users can create Meta campaigns.
+  authorize(user, true);
+
+  assert(
+    body &&
+      typeof body.name === "string" &&
+      body.name.trim().length >= 3 &&
+      body.name.trim().length <= 200,
+    422,
+    "Enter a valid campaign name"
+  );
+
+  const allowedObjectives = [
+    "OUTCOME_AWARENESS",
+    "OUTCOME_TRAFFIC",
+    "OUTCOME_ENGAGEMENT",
+    "OUTCOME_LEADS",
+    "OUTCOME_SALES",
+    "OUTCOME_APP_PROMOTION"
+  ];
+
+  assert(
+    typeof body.objective === "string" &&
+      allowedObjectives.includes(body.objective),
+    422,
+    "Select a valid Meta campaign objective"
+  );
+
+  // Get linked CRM Meta account including backend connection key.
+  const account = await findAccount(
+    user,
+    accountId,
+    true
+  );
+
+  assert(
+    account.enabled,
+    409,
+    "This Meta ad account is disabled in CRM"
+  );
+
+  assert(
+    account.connectionKey,
+    422,
+    "Meta backend connection is missing"
+  );
+
+  const graph = new MetaGraph(
+    config,
+    account.connectionKey
+  );
+
+  // Always create PAUSED first.
+  // We will add a separate Publish / Activate action later.
+const meta = await graph.post(
+  `${account.metaAccountId}/campaigns`,
+  {
+    name: body.name.trim(),
+
+    objective: body.objective,
+
+    buying_type: "AUCTION",
+
+    status: "PAUSED",
+
+    special_ad_categories:
+      Array.isArray(body.specialAdCategories)
+        ? body.specialAdCategories
+        : [],
+
+    // Current Meta API requires this when
+    // campaign budget is NOT used and the
+    // budget will be placed on the Ad Set.
+    is_adset_budget_sharing_enabled: false
+  }
+);
+
+  assert(
+    meta &&
+      typeof meta.id === "string" &&
+      /^\d+$/.test(meta.id),
+    422,
+    "Meta did not return a campaign ID"
+  );
+
+  return {
+    id: meta.id,
+    name: body.name.trim(),
+    objective: body.objective,
+    status: "PAUSED",
+    accountId: account._id,
+    metaAccountId: account.metaAccountId
+  };
+}
+// =====================================================
+// CREATE META AD SET
+//
+// Handles:
+// - Campaign
+// - Daily budget
+// - Start / End time
+// - Location
+// - Age
+// - Gender
+// - Audience targeting
+//
+// Always created as PAUSED.
+// =====================================================
+
+export async function createAdSet(
+  user,
+  accountId,
+  body,
+  config
+) {
+  authorize(user, true);
+
+
+  // ===================================================
+  // BASIC BODY
+  // ===================================================
+
+  assert(
+    body &&
+      typeof body === "object",
+    422,
+    "Invalid Ad Set details"
+  );
+
+
+  // ===================================================
+  // CAMPAIGN ID
+  // ===================================================
+
+  assert(
+    typeof body.campaignId === "string" &&
+      /^\d+$/.test(body.campaignId),
+    422,
+    "Select a valid Meta campaign"
+  );
+
+
+  // ===================================================
+  // AD SET NAME
+  // ===================================================
+
+  assert(
+    typeof body.name === "string" &&
+      body.name.trim().length >= 3 &&
+      body.name.trim().length <= 200,
+    422,
+    "Enter a valid Ad Set name"
+  );
+
+
+  // ===================================================
+  // DAILY BUDGET
+  //
+  // User enters:
+  // ₹200
+  //
+  // Meta receives:
+  // 20000 paise
+  // ===================================================
+
+  const dailyBudget =
+    Number(body.dailyBudget);
+
+  assert(
+    Number.isFinite(dailyBudget) &&
+      dailyBudget > 0 &&
+      dailyBudget <= 1000000,
+    422,
+    "Enter a valid daily budget"
+  );
+
+
+  // ===================================================
+  // AGE
+  // ===================================================
+
+  const ageMin =
+    Number(body.ageMin);
+
+  const ageMax =
+    Number(body.ageMax);
+
+
+  assert(
+    Number.isInteger(ageMin) &&
+      ageMin >= 18 &&
+      ageMin <= 65,
+    422,
+    "Enter a valid minimum age"
+  );
+
+
+  assert(
+    Number.isInteger(ageMax) &&
+      ageMax >= ageMin &&
+      ageMax <= 65,
+    422,
+    "Enter a valid maximum age"
+  );
+
+
+  // ===================================================
+  // GENDER
+  // ===================================================
+
+  const allowedGenders = [
+    "ALL",
+    "MALE",
+    "FEMALE"
+  ];
+
+
+  assert(
+    typeof body.gender === "string" &&
+      allowedGenders.includes(
+        body.gender
+      ),
+    422,
+    "Select a valid gender"
+  );
+
+
+  // ===================================================
+  // META LOCATION KEY
+  //
+  // IMPORTANT:
+  // This is NOT simply the word "Madurai".
+  //
+  // Meta targeting uses a location/city key.
+  // We will build the location search API next.
+  // ===================================================
+
+  assert(
+    typeof body.locationKey === "string" &&
+      /^\d+$/.test(body.locationKey),
+    422,
+    "Select a valid Meta target location"
+  );
+
+
+  // ===================================================
+  // START / END
+  // ===================================================
+
+  assert(
+    typeof body.startTime === "string" &&
+      Number.isFinite(
+        Date.parse(body.startTime)
+      ),
+    422,
+    "Select a valid start date"
+  );
+
+
+  assert(
+    typeof body.endTime === "string" &&
+      Number.isFinite(
+        Date.parse(body.endTime)
+      ),
+    422,
+    "Select a valid end date"
+  );
+
+
+  assert(
+    Date.parse(body.endTime) >
+      Date.parse(body.startTime),
+    422,
+    "End date must be after start date"
+  );
+
+
+  // ===================================================
+  // META OPTIMIZATION SETTINGS
+  //
+  // Different campaign objectives can require different
+  // optimization goals.
+  // Angular will map these later.
+  // ===================================================
+
+  assert(
+    typeof body.optimizationGoal === "string" &&
+      /^[A-Z0-9_]{2,60}$/.test(
+        body.optimizationGoal
+      ),
+    422,
+    "Invalid optimization goal"
+  );
+
+
+  assert(
+    typeof body.billingEvent === "string" &&
+      /^[A-Z0-9_]{2,60}$/.test(
+        body.billingEvent
+      ),
+    422,
+    "Invalid billing event"
+  );
+
+
+  // ===================================================
+  // GET LINKED META ACCOUNT
+  // ===================================================
+
+  const account =
+    await findAccount(
+      user,
+      accountId,
+      true
+    );
+
+
+  assert(
+    account.enabled,
+    409,
+    "This Meta ad account is disabled in CRM"
+  );
+
+
+  assert(
+    account.connectionKey,
+    422,
+    "Meta backend connection is missing"
+  );
+
+
+  // ===================================================
+  // META GRAPH CLIENT
+  // ===================================================
+
+  const graph =
+    new MetaGraph(
+      config,
+      account.connectionKey
+    );
+
+
+  // ===================================================
+  // TARGETING
+  // ===================================================
+
+  const targeting = {
+
+    age_min:
+      ageMin,
+
+    age_max:
+      ageMax,
+
+    geo_locations: {
+
+      cities: [
+        {
+          key:
+            body.locationKey
+        }
+      ]
+
+    }
+
+  };
+
+
+  // Meta:
+  // 1 = Male
+  // 2 = Female
+  //
+  // No genders field = All
+  // ===================================================
+
+  if (
+    body.gender === "MALE"
+  ) {
+
+    targeting.genders = [1];
+
+  }
+
+
+  if (
+    body.gender === "FEMALE"
+  ) {
+
+    targeting.genders = [2];
+
+  }
+
+
+  // ===================================================
+  // CREATE AD SET IN META
+  //
+  // Always PAUSED first.
+  // ===================================================
+
+  const payload = {
+
+    campaign_id:
+      body.campaignId,
+
+    name:
+      body.name.trim(),
+
+    daily_budget:
+      String(
+        Math.round(
+          dailyBudget * 100
+        )
+      ),
+
+    billing_event:
+      body.billingEvent,
+
+    optimization_goal:
+      body.optimizationGoal,
+
+    bid_strategy:
+      "LOWEST_COST_WITHOUT_CAP",
+
+    targeting,
+
+    start_time:
+      body.startTime,
+
+    end_time:
+      body.endTime,
+
+    status:
+      "PAUSED"
+
+  };
+
+
+  // ===================================================
+  // OPTIONAL DESTINATION TYPE
+  // ===================================================
+
+  if (
+    typeof body.destinationType === "string" &&
+    body.destinationType
+  ) {
+
+    payload.destination_type =
+      body.destinationType;
+
+  }
+
+
+  // ===================================================
+  // OPTIONAL PROMOTED OBJECT
+  //
+  // Some objectives such as Leads may need this.
+  // ===================================================
+
+  if (
+    body.promotedObject &&
+    typeof body.promotedObject === "object"
+  ) {
+
+    payload.promoted_object =
+      body.promotedObject;
+
+  }
+
+
+  const meta =
+    await graph.post(
+      `${account.metaAccountId}/adsets`,
+      payload
+    );
+
+
+  // ===================================================
+  // VERIFY META RESPONSE
+  // ===================================================
+
+  assert(
+    meta &&
+      typeof meta.id === "string" &&
+      /^\d+$/.test(meta.id),
+    422,
+    "Meta did not return an Ad Set ID"
+  );
+
+
+  // ===================================================
+  // RETURN SAFE DATA
+  // ===================================================
+
+  return {
+
+    id:
+      meta.id,
+
+    campaignId:
+      body.campaignId,
+
+    name:
+      body.name.trim(),
+
+    dailyBudget,
+
+    ageMin,
+
+    ageMax,
+
+    gender:
+      body.gender,
+
+    locationKey:
+      body.locationKey,
+
+    startTime:
+      body.startTime,
+
+    endTime:
+      body.endTime,
+
+    status:
+      "PAUSED",
+
+    accountId:
+      account._id,
+
+    metaAccountId:
+      account.metaAccountId
+
+  };
+}
+// =====================================================
+// SEARCH META TARGET LOCATIONS
+//
+// Example:
+// Madurai
+// Chennai
+// Coimbatore
+//
+// Returns Meta's real city targeting key.
+// =====================================================
+
+export async function searchLocations(
+  user,
+  accountId,
+  query,
+  config
+) {
+  authorize(user, true);
+
+
+  // ===================================================
+  // SEARCH TEXT
+  // ===================================================
+
+  const q =
+    String(query?.q || "")
+      .trim();
+
+
+  assert(
+    q.length >= 2 &&
+      q.length <= 80,
+    422,
+    "Enter at least 2 characters to search location"
+  );
+
+
+  // ===================================================
+  // GET LINKED META ACCOUNT
+  // ===================================================
+
+  const account =
+    await findAccount(
+      user,
+      accountId,
+      true
+    );
+
+
+  assert(
+    account.enabled,
+    409,
+    "This Meta ad account is disabled in CRM"
+  );
+
+
+  assert(
+    account.connectionKey,
+    422,
+    "Meta backend connection is missing"
+  );
+
+
+  // ===================================================
+  // META GRAPH CLIENT
+  // ===================================================
+
+  const graph =
+    new MetaGraph(
+      config,
+      account.connectionKey
+    );
+
+
+  // ===================================================
+  // META TARGETING SEARCH
+  //
+  // Search only Indian cities.
+  // ===================================================
+
+  const result =
+    await graph.get(
+      "search",
+      {
+        type:
+          "adgeolocation",
+
+        location_types:
+          ["city"],
+
+        q,
+
+        country_code:
+          "IN",
+
+        limit:
+          25
+      }
+    );
+
+
+  // ===================================================
+  // VALIDATE RESPONSE
+  // ===================================================
+
+  assert(
+    Array.isArray(result?.data),
+    422,
+    "Meta returned an invalid location search response"
+  );
+
+
+  // ===================================================
+  // RETURN ONLY SAFE FIELDS
+  // ===================================================
+
+  return {
+    locations:
+      result.data.map(
+        (item) => ({
+          key:
+            String(item.key || ""),
+
+          name:
+            item.name || "",
+
+          type:
+            item.type || "",
+
+          countryCode:
+            item.country_code || "",
+
+          countryName:
+            item.country_name || "",
+
+          region:
+            item.region || "",
+
+          regionId:
+            item.region_id || ""
+        })
+      )
+      .filter(
+        (item) =>
+          item.key &&
+          item.name
+      )
+  };
+}
+// =====================================================
+// GET META CREATIVE ASSETS
+//
+// Loads:
+// - Facebook Pages available to the ad account
+// - Instagram accounts available to the ad account
+//
+// Used later when creating the Ad Creative.
+// =====================================================
+
+// =====================================================
+// GET META CREATIVE ASSETS
+//
+// Loads:
+// - Facebook Pages available to the ad account
+// - Instagram accounts available to the ad account
+//
+// If the ad account does not directly return Instagram,
+// we also check the Instagram Business Account connected
+// to each Facebook Page.
+// =====================================================
+
+export async function creativeAssets(
+  user,
+  accountId,
+  config
+) {
+  authorize(user, true);
+
+
+  // ===================================================
+  // GET LINKED META ACCOUNT
+  // ===================================================
+
+  const account =
+    await findAccount(
+      user,
+      accountId,
+      true
+    );
+
+
+  assert(
+    account.enabled,
+    409,
+    "This Meta ad account is disabled in CRM"
+  );
+
+
+  assert(
+    account.connectionKey,
+    422,
+    "Meta backend connection is missing"
+  );
+
+
+  // ===================================================
+  // META GRAPH CLIENT
+  // ===================================================
+
+  const graph =
+    new MetaGraph(
+      config,
+      account.connectionKey
+    );
+
+
+  // ===================================================
+  // LOAD FACEBOOK PAGES
+  // ===================================================
+
+  const pagesResponse =
+    await graph.get(
+      `${account.metaAccountId}/promote_pages`,
+      {
+        fields:
+          "id,name",
+
+        limit:
+          100
+      }
+    );
+
+
+  const pages =
+    Array.isArray(
+      pagesResponse?.data
+    )
+      ? pagesResponse.data
+          .map(
+            (item) => ({
+              id:
+                String(
+                  item.id || ""
+                ),
+
+              name:
+                item.name || ""
+            })
+          )
+          .filter(
+            (item) =>
+              item.id &&
+              item.name
+          )
+      : [];
+
+
+  // ===================================================
+  // FIRST TRY:
+  // INSTAGRAM ACCOUNTS DIRECTLY FROM AD ACCOUNT
+  // ===================================================
+
+  const instagramResponse =
+    await graph.get(
+      `${account.metaAccountId}/instagram_accounts`,
+      {
+        fields:
+          "id,name,username",
+
+        limit:
+          100
+      }
+    );
+
+
+  let instagramAccounts =
+    Array.isArray(
+      instagramResponse?.data
+    )
+      ? instagramResponse.data
+          .map(
+            (item) => ({
+              id:
+                String(
+                  item.id || ""
+                ),
+
+              name:
+                item.name || "",
+
+              username:
+                item.username || ""
+            })
+          )
+          .filter(
+            (item) =>
+              item.id
+          )
+      : [];
+
+
+  // ===================================================
+  // FALLBACK:
+  // GET INSTAGRAM BUSINESS ACCOUNT FROM FACEBOOK PAGE
+  //
+  // This is useful when:
+  // /act_xxx/instagram_accounts
+  // returns []
+  // ===================================================
+
+  if (
+    !instagramAccounts.length &&
+    pages.length
+  ) {
+
+    const pageInstagramAccounts = [];
+
+
+    for (const page of pages) {
+
+      const pageMeta =
+        await graph.get(
+          page.id,
+          {
+            fields:
+              "id,name,instagram_business_account{id,name,username}"
+          }
+        );
+
+
+      const instagram =
+        pageMeta?.instagram_business_account;
+
+
+      if (
+        instagram &&
+        instagram.id
+      ) {
+
+        pageInstagramAccounts.push({
+          id:
+            String(
+              instagram.id
+            ),
+
+          name:
+            instagram.name || "",
+
+          username:
+            instagram.username || ""
+        });
+
+      }
+
+    }
+
+
+    // Remove duplicates
+    instagramAccounts =
+      [
+        ...new Map(
+          pageInstagramAccounts.map(
+            (item) => [
+              item.id,
+              item
+            ]
+          )
+        ).values()
+      ];
+
+  }
+
+
+  // ===================================================
+  // RETURN SAFE DATA
+  // ===================================================
+
+  return {
+    pages,
+    instagramAccounts
+  };
+}
+// =====================================================
+// CREATE META IMAGE AD
+//
+// Creates:
+// - Ad Creative
+// - Meta Ad
+//
+// The final Ad is ALWAYS created as PAUSED.
+// No spending starts automatically.
+// =====================================================
+
+export async function createImageAd(
+  user,
+  accountId,
+  body,
+  config
+) {
+  authorize(user, true);
+
+
+  // ===================================================
+  // BASIC BODY
+  // ===================================================
+
+  assert(
+    body &&
+      typeof body === "object",
+    422,
+    "Invalid Meta Ad details"
+  );
+
+
+  // ===================================================
+  // AD SET ID
+  // ===================================================
+
+  assert(
+    typeof body.adSetId === "string" &&
+      /^\d+$/.test(body.adSetId),
+    422,
+    "Select a valid Meta Ad Set"
+  );
+
+
+  // ===================================================
+  // AD NAME
+  // ===================================================
+
+  const name =
+    String(body.name || "")
+      .trim();
+
+
+  assert(
+    name.length >= 3 &&
+      name.length <= 200,
+    422,
+    "Enter a valid Ad name"
+  );
+
+
+  // ===================================================
+  // FACEBOOK PAGE
+  // ===================================================
+
+  assert(
+    typeof body.pageId === "string" &&
+      /^\d+$/.test(body.pageId),
+    422,
+    "Select a Facebook Page"
+  );
+
+
+  // ===================================================
+  // INSTAGRAM
+  //
+  // Optional.
+  // ===================================================
+
+  if (body.instagramAccountId) {
+
+    assert(
+      typeof body.instagramAccountId === "string" &&
+        /^\d+$/.test(body.instagramAccountId),
+      422,
+      "Select a valid Instagram account"
+    );
+
+  }
+
+
+  // ===================================================
+  // PRIMARY TEXT
+  // ===================================================
+
+  const primaryText =
+    String(body.primaryText || "")
+      .trim();
+
+
+  assert(
+    primaryText.length >= 1 &&
+      primaryText.length <= 2000,
+    422,
+    "Enter the Primary Text"
+  );
+
+
+  // ===================================================
+  // HEADLINE
+  // ===================================================
+
+  const headline =
+    String(body.headline || "")
+      .trim();
+
+
+  assert(
+    headline.length <= 255,
+    422,
+    "Headline is too long"
+  );
+
+
+  // ===================================================
+  // DESCRIPTION
+  // ===================================================
+
+  const description =
+    String(body.description || "")
+      .trim();
+
+
+  assert(
+    description.length <= 1000,
+    422,
+    "Description is too long"
+  );
+
+
+  // ===================================================
+  // DESTINATION URL
+  //
+  // Must be a public HTTPS URL.
+  // localhost cannot be used by Meta.
+  // ===================================================
+
+  const destinationUrl =
+    String(body.destinationUrl || "")
+      .trim();
+
+
+  assert(
+    /^https:\/\/[^\s]+$/i.test(
+      destinationUrl
+    ),
+    422,
+    "Enter a public HTTPS destination URL"
+  );
+
+
+  // ===================================================
+  // IMAGE URL
+  //
+  // Meta must be able to download this image.
+  // Therefore it must also be public HTTPS.
+  // ===================================================
+
+  const imageUrl =
+    String(body.imageUrl || "")
+      .trim();
+
+
+  assert(
+    /^https:\/\/[^\s]+$/i.test(
+      imageUrl
+    ),
+    422,
+    "Enter a public HTTPS image URL"
+  );
+
+
+  // ===================================================
+  // CALL TO ACTION
+  // ===================================================
+
+  const allowedCallToActions = [
+
+    "LEARN_MORE",
+
+    "CONTACT_US",
+
+    "SIGN_UP",
+
+    "GET_QUOTE",
+
+    "APPLY_NOW",
+
+    "BOOK_NOW",
+
+    "SHOP_NOW",
+
+    "SEND_MESSAGE"
+
+  ];
+
+
+  assert(
+    typeof body.callToAction === "string" &&
+      allowedCallToActions.includes(
+        body.callToAction
+      ),
+    422,
+    "Select a valid Call To Action"
+  );
+
+
+  // ===================================================
+  // GET LINKED META ACCOUNT
+  // ===================================================
+
+  const account =
+    await findAccount(
+      user,
+      accountId,
+      true
+    );
+
+
+  assert(
+    account.enabled,
+    409,
+    "This Meta ad account is disabled in CRM"
+  );
+
+
+  assert(
+    account.connectionKey,
+    422,
+    "Meta backend connection is missing"
+  );
+
+
+  // ===================================================
+  // META GRAPH CLIENT
+  // ===================================================
+
+  const graph =
+    new MetaGraph(
+      config,
+      account.connectionKey
+    );
+
+
+  // ===================================================
+  // LINK DATA
+  // ===================================================
+
+  const linkData = {
+
+    message:
+      primaryText,
+
+    link:
+      destinationUrl,
+
+    picture:
+      imageUrl,
+
+    call_to_action: {
+      type:
+        body.callToAction
+    }
+
+  };
+
+
+  // Optional headline
+  if (headline) {
+
+    linkData.name =
+      headline;
+
+  }
+
+
+  // Optional description
+  if (description) {
+
+    linkData.description =
+      description;
+
+  }
+
+
+  // ===================================================
+  // OBJECT STORY SPEC
+  // ===================================================
+
+  const objectStorySpec = {
+
+    page_id:
+      body.pageId,
+
+    link_data:
+      linkData
+
+  };
+
+
+  // Use Instagram when selected
+if (body.instagramAccountId) {
+
+  objectStorySpec.instagram_user_id =
+    body.instagramAccountId;
+
+}
+
+
+  // ===================================================
+  // CREATIVE
+  // ===================================================
+
+  const creative = {
+
+    object_story_spec:
+      objectStorySpec
+
+  };
+
+
+  // ===================================================
+  // CREATE REAL META AD
+  //
+  // IMPORTANT:
+  // Always PAUSED.
+  // ===================================================
+
+  const meta =
+    await graph.post(
+      `${account.metaAccountId}/ads`,
+      {
+
+        name,
+
+        adset_id:
+          body.adSetId,
+
+        creative,
+
+        status:
+          "PAUSED"
+
+      }
+    );
+
+
+  // ===================================================
+  // VERIFY META RESPONSE
+  // ===================================================
+
+  assert(
+    meta &&
+      typeof meta.id === "string" &&
+      /^\d+$/.test(meta.id),
+    422,
+    "Meta did not return an Ad ID"
+  );
+
+
+  // ===================================================
+  // RETURN SAFE DATA
+  // ===================================================
+
+  return {
+
+    id:
+      meta.id,
+
+    name,
+
+    adSetId:
+      body.adSetId,
+
+    pageId:
+      body.pageId,
+
+    instagramAccountId:
+      body.instagramAccountId || "",
+
+    imageUrl,
+
+    destinationUrl,
+
+    callToAction:
+      body.callToAction,
+
+    status:
+      "PAUSED",
+
+    accountId:
+      account._id,
+
+    metaAccountId:
+      account.metaAccountId
+
+  };
+}

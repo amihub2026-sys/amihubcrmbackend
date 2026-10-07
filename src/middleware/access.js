@@ -135,6 +135,7 @@ export const grants = {
   },
 
   digital_marketing: {
+    digitalMarketingPlans: edit,
 
     campaigns: edit,
 

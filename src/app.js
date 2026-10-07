@@ -16,6 +16,7 @@ import { createRouter as notificationsRouter } from "./routes/notifications.rout
 import { createRouter as leadsRouter } from "./routes/leads.routes.js";
 import { createRouter as billingRouter } from "./routes/billing.routes.js";
 import { createRouter as plansResourceRouter } from "./modules/plans/plans.routes.js";
+import { createRouter as digitalMarketingPlansResourceRouter } from "./modules/digitalMarketingPlans/digitalMarketingPlans.routes.js";
 import { createRouter as contentResourceRouter } from "./modules/content/content.routes.js";
 import { createRouter as campaignsResourceRouter } from "./modules/campaigns/campaigns.routes.js";
 import { createRouter as campaignLeadsResourceRouter } from "./modules/campaignLeads/campaignLeads.routes.js";
@@ -102,6 +103,10 @@ export function createApp(config) {
   app.use(leadsRouter(config));
 
   app.use("/api/plans", plansResourceRouter(config));
+  app.use(
+  "/api/digitalMarketingPlans",
+  digitalMarketingPlansResourceRouter(config),
+);
   app.use("/api/content", contentResourceRouter(config));
   app.use("/api/campaigns", campaignsResourceRouter(config));
   app.use("/api/campaignLeads", campaignLeadsResourceRouter(config));

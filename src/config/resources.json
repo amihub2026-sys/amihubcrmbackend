@@ -1,75 +1,131 @@
 {
-  "plans": {
-    "key": "plans",
-    "title": "Monthly plans",
+  "digitalMarketingPlans": {
+    "key": "digitalMarketingPlans",
+    "title": "Digital Marketing Plans",
     "fields": [
       {
-        "key": "title",
-        "label": "Plan name",
-        "type": "text"
+        "key": "name",
+        "label": "Plan Name",
+        "type": "text",
+        "required": true
       },
       {
-        "key": "customerId",
-        "label": "Customer",
-        "type": "customer"
+        "key": "price",
+        "label": "Monthly Price ₹",
+        "type": "number",
+        "required": true
       },
       {
-        "key": "month",
-        "label": "Month",
-        "type": "month"
-      },
-      {
-        "key": "platforms",
-        "label": "Platforms",
-        "type": "text"
-      },
-      {
-        "key": "posterTarget",
+        "key": "posterCount",
         "label": "Posters",
-        "type": "number"
+        "type": "number",
+        "required": true
       },
       {
-        "key": "reelTarget",
-        "label": "Reels",
-        "type": "number"
-      },
-      {
-        "key": "storyTarget",
-        "label": "Stories",
-        "type": "number"
-      },
-      {
-        "key": "videoTarget",
+        "key": "videoCount",
         "label": "Videos",
-        "type": "number"
+        "type": "number",
+        "required": true
       },
       {
-        "key": "assignedEmployees",
-        "label": "Team",
-        "type": "employee-list"
-      },
-      {
-        "key": "planDueDate",
-        "label": "Content plan due",
-        "type": "date"
-      },
-      {
-        "key": "assetsDueDate",
-        "label": "Customer assets due",
-        "type": "date"
-      },
-      {
-        "key": "reportDueDate",
-        "label": "Monthly report due",
-        "type": "date"
+        "key": "description",
+        "label": "Description",
+        "type": "textarea",
+        "required": false
       }
     ],
     "statuses": [
-      "PLANNED",
       "ACTIVE",
-      "COMPLETED"
+      "INACTIVE"
     ]
   },
+
+  
+
+"plans": {
+  "key": "plans",
+  "title": "Monthly plans",
+  "fields": [
+    {
+      "key": "customerId",
+      "label": "Customer",
+      "type": "customer",
+      "required": true
+    },
+    {
+      "key": "digitalMarketingPlanId",
+      "label": "Plan Package",
+      "type": "digitalMarketingPlan",
+      "required": true
+    },
+    {
+      "key": "month",
+      "label": "Month",
+      "type": "month",
+      "required": true
+    },
+    {
+      "key": "planStartDate",
+      "label": "Plan Start Date",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "nextPaymentDate",
+      "label": "Next Payment Date",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "monthlyPrice",
+      "label": "Monthly Price ₹",
+      "type": "number",
+      "required": true
+    },
+    {
+      "key": "posterTarget",
+      "label": "Posters",
+      "type": "number",
+      "required": true
+    },
+    {
+      "key": "videoTarget",
+      "label": "Videos",
+      "type": "number",
+      "required": true
+    },
+    {
+      "key": "autoPayEnabled",
+      "label": "Auto Pay",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "paymentStatus",
+      "label": "Payment Status",
+      "type": "select",
+      "required": false,
+      "options": [
+        "NOT_ENABLED",
+        "PENDING",
+        "ACTIVE",
+        "FAILED",
+        "CANCELLED"
+      ]
+    },
+    {
+      "key": "gatewaySubscriptionId",
+      "label": "Gateway Subscription ID",
+      "type": "text",
+      "required": false
+    }
+  ],
+  "statuses": [
+    "PLANNED",
+    "ACTIVE",
+    "COMPLETED"
+  ]
+},
   "content": {
     "key": "content",
     "title": "Content calendar",
