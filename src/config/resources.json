@@ -1730,6 +1730,111 @@
       "INACTIVE"
     ]
   },
+ "domainRenewals": {
+  "key": "domainRenewals",
+  "title": "Domain renewals",
+  "fields": [
+    {
+      "key": "customerId",
+      "label": "Customer",
+      "type": "customer",
+      "required": true
+    },
+    {
+      "key": "domainName",
+      "label": "Domain name",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "provider",
+      "label": "Domain provider",
+      "type": "text",
+      "required": false
+    },
+    {
+      "key": "purchaseDate",
+      "label": "Purchase date",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "expiryDate",
+      "label": "Expiry / renewal date",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "renewalAmount",
+      "label": "Renewal amount",
+      "type": "number",
+      "required": false
+    },
+    {
+      "key": "renewalStatus",
+      "label": "Domain status",
+      "type": "select",
+      "required": true,
+      "options": [
+        "ACTIVE",
+        "DUE_SOON",
+        "DUE_TODAY",
+        "EXPIRED"
+      ]
+    },
+    {
+      "key": "followUpStatus",
+      "label": "Follow-up status",
+      "type": "select",
+      "required": true,
+      "options": [
+        "NONE",
+        "PAYMENT_PENDING",
+        "PROMISED_DATE",
+        "ON_HOLD"
+      ]
+    },
+    {
+      "key": "nextFollowUpDate",
+      "label": "Next follow-up / reminder date",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "followUpNote",
+      "label": "Follow-up note",
+      "type": "textarea",
+      "required": false
+    },
+    {
+      "key": "newExpiryDate",
+      "label": "New expiry date",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "reminderEnabled",
+      "label": "Automatic reminders",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "notes",
+      "label": "Internal notes",
+      "type": "textarea",
+      "required": false
+    }
+  ],
+  "statuses": [
+    "ACTIVE",
+    "DUE_SOON",
+    "PAYMENT_PENDING",
+    "PROMISED_DATE",
+    "ON_HOLD",
+    "RENEWED",
+    "EXPIRED"
+  ]
+},
   "visits": {
     "key": "visits",
     "title": "Customer visits",

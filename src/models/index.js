@@ -30,6 +30,7 @@ import { subscriptionsModel } from "./subscriptions.model.js";
 import { customersModel } from "./customers.model.js";
 import { visitsModel } from "./visits.model.js";
 import { attendanceSettingsModel } from "./attendanceSettings.model.js";
+import { domainRenewalsModel } from "./domainRenewal.model.js";
 export const models = {
   plans: plansModel,
 digitalMarketingPlans: digitalMarketingPlanModel,
@@ -62,5 +63,6 @@ digitalMarketingPlans: digitalMarketingPlanModel,
   subscriptions: subscriptionsModel,
   customers: customersModel,
   visits: visitsModel,
+  domainRenewals: domainRenewalsModel,
   attendanceSettings: attendanceSettingsModel
 };

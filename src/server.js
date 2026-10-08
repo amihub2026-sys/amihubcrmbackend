@@ -9,7 +9,7 @@ import { createApp, logger } from "./app.js";
 import cron from "node-cron";
 
 import { markAbsentEmployees } from "./services/attendance-auto.service.js";
-
+import { runDomainRenewalReminders } from "./services/domain-renewal-reminder.service.js";
 import { runOneSync } from "./modules/meta/meta.sync.js";
 
 try {
@@ -35,6 +35,66 @@ try {
 };
 
 runMetaWorker();
+/* =========================================================
+   DOMAIN RENEWAL REMINDER WORKER
+========================================================= */
+
+let domainReminderRunning = false;
+
+const runDomainReminderWorker = async () => {
+  if (domainReminderRunning) {
+    return;
+  }
+
+  domainReminderRunning = true;
+
+  try {
+    const result = await runDomainRenewalReminders(config);
+
+    logger.info(
+      {
+        processed: result.processed,
+        failed: result.failed,
+      },
+      "Domain renewal reminder check completed",
+    );
+  } catch (error) {
+    logger.error(
+      {
+        errorType: error?.name,
+        message: error?.message,
+      },
+      "Domain renewal reminder worker failed",
+    );
+  } finally {
+    domainReminderRunning = false;
+  }
+};
+
+
+/*
+ * Run once whenever backend starts.
+ *
+ * This is important because if the server was offline
+ * during the scheduled time, reminders are checked
+ * immediately after restart.
+ */
+runDomainReminderWorker();
+
+
+/*
+ * Production daily check:
+ * 08:05 AM India time.
+ */
+cron.schedule(
+  "5 8 * * *",
+  async () => {
+    await runDomainReminderWorker();
+  },
+  {
+    timezone: "Asia/Kolkata",
+  },
+);
 
 cron.schedule("*/1 * * * *", async () => {
   await runMetaWorker();

@@ -37,6 +37,7 @@ import { createRouter as departmentsResourceRouter } from "./modules/departments
 import { createRouter as billingProfileResourceRouter } from "./modules/billingProfile/billingProfile.routes.js";
 import { createRouter as ticketsResourceRouter } from "./modules/tickets/tickets.routes.js";
 import { createRouter as renewalsResourceRouter } from "./modules/renewals/renewals.routes.js";
+import { createRouter as domainRenewalsResourceRouter } from "./modules/domainRenewals/domainRenewals.routes.js";
 import { createRouter as invoicesResourceRouter } from "./modules/invoices/invoices.routes.js";
 import { createRouter as installmentsResourceRouter } from "./modules/installments/installments.routes.js";
 import { createRouter as paymentsResourceRouter } from "./modules/payments/payments.routes.js";
@@ -127,6 +128,8 @@ export function createApp(config) {
   app.use("/api/billingProfile", billingProfileResourceRouter(config));
   app.use("/api/tickets", ticketsResourceRouter(config));
   app.use("/api/renewals", renewalsResourceRouter(config));
+  app.use("/api/domainRenewals", domainRenewalsResourceRouter(config));
+
   app.use("/api/invoices", invoicesResourceRouter(config));
   app.use("/api/installments", installmentsResourceRouter(config));
   app.use("/api/payments", paymentsResourceRouter(config));
