@@ -161,8 +161,29 @@ cron.schedule("*/1 * * * *", async () => {
   process.on("SIGINT", shutdown);
 
   process.on("SIGTERM", shutdown);
+  // TEMPORARY DEBUGGING — remove after diagnosis
+server.on("close", () => {
+  console.log("DEBUG: HTTP server closed");
+});
 
-} catch (error) {
+process.on("beforeExit", (code) => {
+  console.log("DEBUG: beforeExit", code);
+});
+
+process.on("exit", (code) => {
+  console.log("DEBUG: process exit", code);
+});
+
+process.on("SIGINT", () => {
+  console.log("DEBUG: SIGINT received");
+});
+
+process.on("SIGTERM", () => {
+  console.log("DEBUG: SIGTERM received");
+});
+
+}
+ catch (error) {
 
   logger.fatal(
 

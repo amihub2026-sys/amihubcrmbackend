@@ -82,9 +82,45 @@ export function createApp(config) {
     next();
   });
 
-  app.use(healthRouter(config));
+app.use(healthRouter(config));
 
-  app.use("/api", rateLimit);
+// CORS for authorized AMI HUB CRM frontend origins
+app.use("/api", (req, res, next) => {
+  const origin = req.get("Origin");
+  const allowed = Boolean(
+    origin && config.origins.includes(origin)
+  );
+
+  res.vary("Origin");
+
+  if (allowed) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-CSRF-Token, X-XSRF-TOKEN"
+    );
+  }
+
+  // Handle browser preflight before authentication
+  if (req.method === "OPTIONS") {
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Origin not allowed"
+      });
+    }
+
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
+app.use("/api", rateLimit);
 
   // Login must be registered before authentication; all other auth routes are protected.
   const auth = authRouter(config);
