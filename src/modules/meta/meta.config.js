@@ -2,7 +2,7 @@ export function metaConfiguration(env = process.env) {
   let connections = {};
 
   try {
-    connections = JSON.parse(env.META_CONNECTIONS_JSON || "{}");
+  connections = JSON.parse(env.META_CONNECTIONS_JSON || "{}");
   } catch {
     throw new Error("META_CONNECTIONS_JSON must be a JSON object");
   }
