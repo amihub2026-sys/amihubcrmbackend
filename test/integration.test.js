@@ -128,7 +128,7 @@ test("login creates attendance once, rejects bad password and requires CSRF", as
 test("all frontend resource endpoints have the paginated contract", async () => {
   const boot = await owner.agent.get("/api/bootstrap");
   assert.equal(boot.status, 200);
-  assert.equal(boot.body.resources.length, 29);
+assert.equal(boot.body.resources.length, 33);
   for (const resource of boot.body.resources) {
     const res = await owner.agent.get("/api/" + resource);
     assert.equal(res.status, 200);

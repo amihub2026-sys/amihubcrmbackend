@@ -3,10 +3,12 @@ export function sessionCookies(config) {
     cookie: {
       httpOnly: true,
       secure: config.production,
-      sameSite: "lax",
+      sameSite: config.production ? "none" : "lax",
       path: "/",
       maxAge: config.sessionHours * 3600000,
     },
-    cookieName: config.production ? "__Host-crm_session" : "crm_session",
+    cookieName: config.production
+      ? "__Host-crm_session"
+      : "crm_session",
   };
 }
