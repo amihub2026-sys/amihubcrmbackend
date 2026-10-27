@@ -724,16 +724,113 @@ export async function save(u, r, body, id, config, idempotencyKey) {
           runValidators: true,
         },
       );
+  
     } else {
       await models[r].create([record], {
         session,
       });
     }
 
+    // =====================================================
+    // CONTENT CALENDAR -> EMPLOYEE TASKS
+    // =====================================================
+
+    if (r === "content") {
+      const existingTask = await models.tasks
+        .findOne({ contentId: record._id })
+        .session(session)
+        .lean();
+
+      if (record.assignedTo) {
+        const taskData = {
+          title: record.title,
+          description:
+            record.taskInstructions ||
+            `Digital Marketing ${record.contentType || "content"}: ${record.title}`,
+          contentId: record._id,
+          marketingPlanId: record.marketingPlanId,
+          assignedTo: record.assignedTo,
+          dueDate:
+            record.deadline ||
+            record.approvalDueDate ||
+            record.scheduledDate,
+        };
+
+        if (
+          ["LOW", "MEDIUM", "HIGH", "URGENT"].includes(
+            record.priority
+          )
+        ) {
+          taskData.priority = record.priority;
+        }
+
+        if (existingTask) {
+          const reassigned =
+            existingTask.assignedTo !== record.assignedTo;
+
+          await models.tasks.updateOne(
+            { _id: existingTask._id },
+            {
+              $set: {
+                ...taskData,
+                ...(reassigned
+                  ? { status: "TODO", progress: 0 }
+                  : {}),
+              },
+              $inc: { revision: 1 },
+            },
+            {
+              session,
+              runValidators: true,
+            }
+          );
+        } else {
+          const [newTask] = await models.tasks.create(
+            [
+              {
+                _id: record._id,
+                ...taskData,
+                status: "TODO",
+                progress: 0,
+                revision: 1,
+                createdBy: u._id,
+              },
+            ],
+            { session }
+          );
+
+          await audit(
+            u,
+            "tasks",
+            newTask.toObject(),
+            "Created from Content Calendar",
+            session
+          );
+        }
+      } else if (existingTask) {
+        await models.tasks.updateOne(
+          { _id: existingTask._id },
+          {
+            $unset: { assignedTo: "" },
+            $inc: { revision: 1 },
+          },
+          {
+            session,
+            runValidators: true,
+          }
+        );
+      }
+    }
+
+    // =====================================================
+    // EXISTING EMPLOYEE LOGIC
+    // =====================================================
+
     if (
       r === "employees" &&
       record.status === "INACTIVE"
     ) {
+
       const users = await models.users
         .find({
           employeeId: record._id,
