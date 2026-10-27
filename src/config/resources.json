@@ -126,73 +126,107 @@
     "COMPLETED"
   ]
 },
-  "content": {
-    "key": "content",
-    "title": "Content calendar",
-    "fields": [
-      {
-        "key": "title",
-        "label": "Content title",
-        "type": "text"
-      },
-      {
-        "key": "marketingPlanId",
-        "label": "Marketing plan",
-        "type": "plan"
-      },
-      {
-        "key": "customerId",
-        "label": "Customer",
-        "type": "customer"
-      },
-      {
-        "key": "contentType",
-        "label": "Content type",
-        "type": "text"
-      },
-      {
-        "key": "platform",
-        "label": "Platform",
-        "type": "text"
-      },
-      {
-        "key": "scheduledDate",
-        "label": "Scheduled date",
-        "type": "date"
-      },
-      {
-        "key": "assignedTo",
-        "label": "Assigned to",
-        "type": "employee"
-      },
-      {
-        "key": "fileUrl",
-        "label": "Creative URL",
-        "type": "url"
-      },
-      {
-        "key": "clientFeedback",
-        "label": "Client feedback",
-        "type": "textarea"
-      },
-      {
-        "key": "approvalDueDate",
-        "label": "Client approval due",
-        "type": "date"
-      }
-    ],
-    "statuses": [
-      "PLANNED",
-      "ASSIGNED",
-      "CREATED",
-      "INTERNAL_REVIEW",
-      "CLIENT_REVIEW",
-      "REVISION",
-      "APPROVED",
-      "SCHEDULED",
-      "PUBLISHED"
-    ]
-  },
+"content": {
+  "key": "content",
+  "title": "Content calendar",
+  "fields": [
+    {
+      "key": "title",
+      "label": "Content Title",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "marketingPlanId",
+      "label": "Marketing Plan",
+      "type": "plan",
+      "required": true
+    },
+    {
+      "key": "customerId",
+      "label": "Customer",
+      "type": "customer",
+      "required": true
+    },
+    {
+      "key": "contentType",
+      "label": "Content Type",
+      "type": "select",
+      "required": true,
+      "options": [
+        "Poster",
+        "Video"
+      ]
+    },
+    {
+      "key": "platform",
+      "label": "Platform",
+      "type": "text"
+    },
+    {
+      "key": "scheduledDate",
+      "label": "Scheduled Date",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "assignedTo",
+      "label": "Assigned Employee",
+      "type": "employee",
+      "required": false
+    },
+    {
+      "key": "taskInstructions",
+      "label": "Task Instructions",
+      "type": "textarea",
+      "required": false
+    },
+    {
+      "key": "deadline",
+      "label": "Work Deadline",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "type": "select",
+      "required": false,
+      "options": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "URGENT"
+      ]
+    },
+    {
+      "key": "fileUrl",
+      "label": "Creative URL",
+      "type": "url"
+    },
+    {
+      "key": "clientFeedback",
+      "label": "Client Feedback",
+      "type": "textarea"
+    },
+    {
+      "key": "approvalDueDate",
+      "label": "Client Approval Due",
+      "type": "date"
+    }
+  ],
+  "statuses": [
+    "PLANNED",
+    "ASSIGNED",
+    "CREATED",
+    "INTERNAL_REVIEW",
+    "CLIENT_REVIEW",
+    "REVISION",
+    "APPROVED",
+    "SCHEDULED",
+    "PUBLISHED"
+  ]
+},
   "campaigns": {
     "key": "campaigns",
     "title": "Ad campaigns",
@@ -418,64 +452,79 @@
       "DELIVERED"
     ]
   },
-  "tasks": {
-    "key": "tasks",
-    "title": "Tasks",
-    "fields": [
-      {
-        "key": "title",
-        "label": "Task title",
-        "type": "text"
-      },
-      {
-        "key": "projectId",
-        "label": "Project",
-        "type": "project"
-      },
-      {
-        "key": "description",
-        "label": "Description",
-        "type": "textarea"
-      },
-      {
-        "key": "assignedTo",
-        "label": "Assigned to",
-        "type": "employee"
-      },
-      {
-        "key": "dueDate",
-        "label": "Due date",
-        "type": "date"
-      },
-      {
-        "key": "priority",
-        "label": "Priority",
-        "type": "text"
-      },
-      {
-        "key": "progress",
-        "label": "Progress (%)",
-        "type": "number"
-      },
-      {
-        "key": "comments",
-        "label": "Comments",
-        "type": "textarea"
-      },
-      {
-        "key": "attachments",
-        "label": "File link",
-        "type": "url"
-      }
-    ],
-    "statuses": [
-      "TODO",
-      "IN_PROGRESS",
-      "REVIEW",
-      "CHANGES_REQUIRED",
-      "COMPLETED"
-    ]
-  },
+
+"tasks": {
+  "key": "tasks",
+  "title": "Tasks",
+  "fields": [
+    {
+      "key": "title",
+      "label": "Task Title",
+      "type": "text"
+    },
+    {
+      "key": "projectId",
+      "label": "Project",
+      "type": "project",
+      "required": false
+    },
+    {
+      "key": "contentId",
+      "label": "Digital Marketing Content ID",
+      "type": "text",
+      "required": false
+    },
+    {
+      "key": "marketingPlanId",
+      "label": "Monthly Marketing Plan",
+      "type": "plan",
+      "required": false
+    },
+    {
+      "key": "description",
+      "label": "Task Instructions / Description",
+      "type": "textarea"
+    },
+    {
+      "key": "assignedTo",
+      "label": "Assigned Employee",
+      "type": "employee"
+    },
+    {
+      "key": "dueDate",
+      "label": "Due Date",
+      "type": "date"
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "type": "text"
+    },
+    {
+      "key": "progress",
+      "label": "Progress (%)",
+      "type": "number"
+    },
+    {
+      "key": "comments",
+      "label": "Comments / Manager Feedback",
+      "type": "textarea"
+    },
+    {
+      "key": "attachments",
+      "label": "Completed Work URL",
+      "type": "url"
+    }
+  ],
+  "statuses": [
+    "TODO",
+    "IN_PROGRESS",
+    "REVIEW",
+    "CHANGES_REQUIRED",
+    "COMPLETED"
+  ]
+},
+
   "files": {
     "key": "files",
     "title": "Project files",

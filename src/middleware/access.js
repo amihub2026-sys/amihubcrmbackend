@@ -134,24 +134,24 @@ export const grants = {
 
   },
 
-  digital_marketing: {
-    digitalMarketingPlans: edit,
+digital_marketing: {
+  digitalMarketingPlans: edit,
 
-    campaigns: edit,
+  campaigns: edit,
+  campaignLeads: edit,
 
-    campaignLeads: edit,
+  visits: edit,
+  customers: read,
 
-    visits: edit,
+  plans: edit,
+  content: edit,
 
-    customers: read,
+  // Allow the Digital Marketing Manager
+  // to create and manage employee tasks
+  tasks: edit,
 
-    plans: edit,
-
-    content: edit,
-
-    leave: selfLeave,
-
-  },
+  leave: selfLeave,
+},
 
   hr: {
 
