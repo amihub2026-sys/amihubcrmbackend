@@ -1314,7 +1314,37 @@
         "label": "Service period",
         "type": "month",
         "required": false
-      }
+      },
+      {
+  "key": "manualCustomerName",
+  "label": "Manual Customer Name",
+  "type": "text",
+  "required": false
+},
+{
+  "key": "manualCustomerPhone",
+  "label": "Manual Customer Phone",
+  "type": "text",
+  "required": false
+},
+{
+  "key": "manualCustomerAddress",
+  "label": "Manual Customer Address",
+  "type": "textarea",
+  "required": false
+},
+{
+  "key": "manualCustomerGstin",
+  "label": "Manual Customer GSTIN",
+  "type": "text",
+  "required": false
+},
+{
+  "key": "manualProjectName",
+  "label": "Manual Project Name",
+  "type": "text",
+  "required": false
+}
     ],
     "statuses": [
       "DRAFT",
@@ -1598,7 +1628,7 @@
         "key": "customerId",
         "label": "Customer",
         "type": "customer",
-        "required": true
+        "required": false
       },
       {
         "key": "invoiceId",

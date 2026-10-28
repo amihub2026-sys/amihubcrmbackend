@@ -66,70 +66,188 @@ export async function list(u, r, page = 1, pageSize = 200) {
   };
 }
 
-async function links(u, r, record, session) {
+
+
+async function links(u, r, record, session, existing = null) {
   const linked = {};
 
+  const isMarketingTask =
+    r === "tasks" && Boolean(record.contentId);
+
+  const assignedTaskUpdate =
+    r === "tasks" &&
+    Boolean(existing) &&
+    Boolean(u.employeeId) &&
+    existing.assignedTo === u.employeeId &&
+    record.assignedTo === existing.assignedTo;
+
   for (const f of resources[r].fields) {
-    const target = references[f.type],
-      value = record[f.key];
+    const target = references[f.type];
+    const value = record[f.key];
 
     if (!target || !value) continue;
 
-    for (const id of Array.isArray(value) ? value : [value]) {
-      const row = await models[target].findById(id).session(session).lean();
+    assert(
+      !(isMarketingTask && f.key === "projectId"),
+      422,
+      "Digital Marketing tasks cannot have a Project ID"
+    );
+
+    for (const linkedId of Array.isArray(value) ? value : [value]) {
+      const row = await models[target]
+        .findById(linkedId)
+        .session(session)
+        .lean();
 
       assert(row, 422, `Invalid reference: ${f.key}`);
 
-      // Directory-only employee references are allowed; other scoped links must be visible.
-      if (scoped.has(u.role) && target !== "employees")
-        assert(
-          await visible(u, target, row, session),
-          403,
-          `Reference outside assigned work: ${f.key}`,
-        );
+      if (scoped.has(u.role) && target !== "employees") {
+        // An employee may retain the existing parent reference
+        // of a task already assigned to them.
+        const assignedExistingParent =
+          assignedTaskUpdate &&
+          (
+            (
+              f.key === "projectId" &&
+              !isMarketingTask &&
+              existing.projectId === row._id &&
+              record.projectId === existing.projectId
+            ) ||
+            (
+              f.key === "marketingPlanId" &&
+              isMarketingTask &&
+              existing.marketingPlanId === row._id &&
+              record.marketingPlanId === existing.marketingPlanId
+            )
+          );
+
+        if (!assignedExistingParent) {
+          assert(
+            await visible(u, target, row, session),
+            403,
+            `Reference outside assigned work: ${f.key}`
+          );
+        }
+      }
 
       linked[f.key] = row;
     }
   }
 
-  for (const k of [
+  // DIGITAL MARKETING TASK REFERENCES
+  if (isMarketingTask) {
+    assert(
+      !record.projectId,
+      422,
+      "Digital Marketing tasks cannot have a Project ID"
+    );
+
+    assert(
+      record.marketingPlanId,
+      422,
+      "Digital Marketing task requires a Marketing Plan"
+    );
+
+    const content = await models.content
+      .findById(record.contentId)
+      .session(session)
+      .lean();
+
+    assert(
+      content,
+      422,
+      "Linked Content Calendar entry was not found"
+    );
+
+    assert(
+      content.marketingPlanId === record.marketingPlanId,
+      422,
+      "Task Marketing Plan does not match Content Calendar"
+    );
+
+    assert(
+      content.assignedTo === record.assignedTo,
+      422,
+      "Task employee does not match Content Calendar assignment"
+    );
+
+    if (scoped.has(u.role) && !assignedTaskUpdate) {
+      assert(
+        await visible(u, "content", content, session),
+        403,
+        "Content Calendar entry is outside assigned work"
+      );
+    }
+
+    linked.contentId = content;
+  }
+
+  // CUSTOMER REFERENCE VALIDATION
+  for (const key of [
     "projectId",
     "invoiceId",
     "marketingPlanId",
     "campaignId",
     "subscriptionId",
     "visitId",
-  ])
-    if (record.customerId && linked[k]?.customerId)
-      assert(
-        linked[k].customerId === record.customerId,
-        422,
-        `${k} belongs to another customer`,
-      );
+  ]) {
+    if (!record.customerId || !linked[key]?.customerId) {
+      continue;
+    }
 
-  if (linked.installmentId)
+    const customerMismatch =
+      linked[key].customerId !== record.customerId;
+
+    if (!customerMismatch) continue;
+
+    // Existing tasks may contain an old customerId.
+    // Permit an assigned employee's update only when the
+    // Project and Customer relationships remain unchanged.
+    const legacyUnchangedProjectTask =
+      key === "projectId" &&
+      assignedTaskUpdate &&
+      !isMarketingTask &&
+      record.projectId === existing.projectId &&
+      record.customerId === existing.customerId &&
+      linked.projectId._id === existing.projectId;
+
+    assert(
+      legacyUnchangedProjectTask,
+      422,
+      `${key} belongs to another customer`
+    );
+  }
+
+  // INSTALLMENT REFERENCE
+  if (linked.installmentId) {
     assert(
       linked.installmentId.invoiceId === record.invoiceId,
       422,
-      "Installment belongs to another invoice",
+      "Installment belongs to another invoice"
     );
+  }
 
-  if (linked.promiseId)
+  // PROMISE REFERENCE
+  if (linked.promiseId) {
     assert(
       linked.promiseId.invoiceId === record.invoiceId,
       422,
-      "Promise belongs to another invoice",
+      "Promise belongs to another invoice"
     );
+  }
 
-  if (linked.visitId && linked.invoiceId)
+  // VISIT REFERENCE
+  if (linked.visitId && linked.invoiceId) {
     assert(
       linked.visitId.customerId === linked.invoiceId.customerId,
       422,
-      "Visit belongs to another customer",
+      "Visit belongs to another customer"
     );
+  }
 
   return linked;
 }
+
 
 export async function save(u, r, body, id, config, idempotencyKey) {
   assert(can(u, r, id ? "update" : "create"), 403, "Access denied");
@@ -330,8 +448,8 @@ export async function save(u, r, body, id, config, idempotencyKey) {
         "Issued invoice cannot return to Draft",
       );
 
-    const linked = await links(u, r, record, session);
-
+    
+const linked = await links(u, r, record, session, existing);
     if (r === "payroll" && (!existing || existing.status === "CALCULATED")) {
       const employee = linked.employeeId;
 
