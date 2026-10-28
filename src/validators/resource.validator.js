@@ -35,7 +35,7 @@ const required = {
   employees: ["name", "email"],
   attendance: ["employeeId", "date"],
   leave: ["employeeId", "startDate", "endDate", "reason"],
-  invoices: ["invoiceNumber", "customerId", "invoiceDate", "dueDate"],
+invoices: ["invoiceNumber", "invoiceDate", "dueDate"],
   installments: ["invoiceId", "amount", "dueDate"],
   payments: ["invoiceId", "amount", "paymentDate", "paymentMethod"],
   expenses: ["description", "amount", "expenseDate"],
@@ -387,7 +387,26 @@ export function validate(r, body, existing = null) {
       );
     }
   }
+// Allow existing or manual customers for invoices
+if (r === "invoices") {
+  const hasExistingCustomer = Boolean(result.customerId);
 
+  const hasManualCustomer = Boolean(
+    String(result.manualCustomerName || "").trim()
+  );
+
+  assert(
+    hasExistingCustomer !== hasManualCustomer,
+    422,
+    "Select an existing customer or enter a manual customer name"
+  );
+
+  assert(
+    !(result.projectId && result.manualProjectName),
+    422,
+    "Select an existing project or enter a manual project name"
+  );
+}
   // =====================================================
   // DATE RANGE VALIDATION - FIXED
   // =====================================================
